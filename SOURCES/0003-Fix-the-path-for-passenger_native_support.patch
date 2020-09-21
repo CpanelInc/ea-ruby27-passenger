@@ -1,0 +1,24 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rishwanth Yeddula <rish@cpanel.net>
+Date: Mon, 17 Apr 2017 16:06:34 -0500
+Subject: [PATCH 3/7] Fix the path for passenger_native_support
+
+Adopted from the rubygem-passenger-4.0.18_native_dir patch from the
+rh-passenger40 SCL package.
+---
+ src/ruby_supportlib/phusion_passenger/native_support.rb | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/ruby_supportlib/phusion_passenger/native_support.rb b/src/ruby_supportlib/phusion_passenger/native_support.rb
+index 8c18b46..1114530 100644
+--- a/src/ruby_supportlib/phusion_passenger/native_support.rb
++++ b/src/ruby_supportlib/phusion_passenger/native_support.rb
+@@ -110,7 +110,7 @@ def load_from_buildout_dir
+     end
+ 
+     def load_from_load_path
+-      return load_native_extension('passenger_native_support')
++      return load_native_extension('passenger/passenger_native_support')
+     rescue LoadError
+       return false
+     end

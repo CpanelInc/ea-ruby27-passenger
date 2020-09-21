@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rishwanth Yeddula <rish@cpanel.net>
+Date: Mon, 17 Apr 2017 12:13:01 -0500
+Subject: [PATCH 2/7] Avoid using /tmp for the TMPDIR
+
+Adopted from the passenger-4.0.50-tmpdir patch from the rh-passenger40
+SCL package.
+---
+ src/cxx_supportlib/Utils.cpp                         | 2 +-
+ src/ruby_supportlib/phusion_passenger/admin_tools.rb | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/cxx_supportlib/Utils.cpp b/src/cxx_supportlib/Utils.cpp
+index 8f9cbe7..2e92968 100644
+--- a/src/cxx_supportlib/Utils.cpp
++++ b/src/cxx_supportlib/Utils.cpp
+@@ -265,7 +265,7 @@ const char *
+ getSystemTempDir() {
+ 	const char *temp_dir = getenv("TMPDIR");
+ 	if (temp_dir == NULL || *temp_dir == '\0') {
+-		temp_dir = "/tmp";
++		temp_dir = "/var/run/ea-ruby24-passenger";
+ 	}
+ 	return temp_dir;
+ }
+diff --git a/src/ruby_supportlib/phusion_passenger/admin_tools.rb b/src/ruby_supportlib/phusion_passenger/admin_tools.rb
+index cafa69f..c4d9cf4 100644
+--- a/src/ruby_supportlib/phusion_passenger/admin_tools.rb
++++ b/src/ruby_supportlib/phusion_passenger/admin_tools.rb
+@@ -31,7 +31,7 @@ def self.tmpdir
+           return ENV[name]
+         end
+       end
+-      return "/tmp"
++      return "/var/run/ea-ruby24-passenger"
+     end
+ 
+     def self.process_is_alive?(pid)

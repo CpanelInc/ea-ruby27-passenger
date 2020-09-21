@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Rishwanth Yeddula <rish@cpanel.net>
+Date: Wed, 28 Mar 2018 14:46:31 -0500
+Subject: [PATCH 6/7] Use ea-libcurl instead of system curl
+
+---
+ .../phusion_passenger/platform_info/curl.rb               | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/ruby_supportlib/phusion_passenger/platform_info/curl.rb b/src/ruby_supportlib/phusion_passenger/platform_info/curl.rb
+index 52dec20..651760f 100644
+--- a/src/ruby_supportlib/phusion_passenger/platform_info/curl.rb
++++ b/src/ruby_supportlib/phusion_passenger/platform_info/curl.rb
+@@ -28,11 +28,11 @@ module PhusionPassenger
+ 
+   module PlatformInfo
+     def self.curl_flags
+-      result = `(curl-config --cflags) 2>/dev/null`.strip
++      result = `(/opt/cpanel/libcurl/bin/curl-config --cflags) 2>/dev/null`.strip
+       if result.empty?
+         return nil
+       else
+-        version = `curl-config --vernum`.strip
++        version = `/opt/cpanel/libcurl/bin/curl-config --vernum`.strip
+         if version >= '070c01'
+           # Curl >= 7.12.1 supports curl_easy_reset()
+           result << " -DHAS_CURL_EASY_RESET"
+@@ -43,7 +43,7 @@ def self.curl_flags
+     memoize :curl_flags
+ 
+     def self.curl_libs
+-      result = `(curl-config --libs) 2>/dev/null`.strip
++      result = `(/opt/cpanel/libcurl/bin/curl-config --libs) 2>/dev/null`.strip
+       if result.empty?
+         return nil
+       else
+@@ -53,7 +53,7 @@ def self.curl_libs
+     memoize :curl_libs
+ 
+     def self.curl_supports_ssl?
+-      features = `(curl-config --feature) 2>/dev/null`
++      features = `(/opt/cpanel/libcurl/bin/curl-config --feature) 2>/dev/null`
+       return features =~ /SSL/
+     end
+     memoize :curl_supports_ssl?

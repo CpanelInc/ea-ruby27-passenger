@@ -1,0 +1,18 @@
+[submodule "packaging/rpm"]
+	path = packaging/rpm
+	url = https://github.com/phusion/passenger_rpm_automation.git
+[submodule "packaging/debian"]
+	path = packaging/debian
+	url = https://github.com/phusion/passenger_apt_automation.git
+[submodule "build/support/vendor/cxxcodebuilder"]
+	path = build/support/vendor/cxxcodebuilder
+	url = https://github.com/phusion/cxxcodebuilder.git
+[submodule "packaging/binaries"]
+	path = packaging/binaries
+	url = https://github.com/phusion/passenger_binary_build_automation.git
+[submodule "build/support/vendor/cxx_hinted_parser"]
+	path = build/support/vendor/cxx_hinted_parser
+	url = https://github.com/phusion/cxx_hinted_parser.git
+[submodule "packaging/homebrew"]
+	path = packaging/homebrew
+	url = https://github.com/phusion/passenger_homebrew_automation.git

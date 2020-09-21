@@ -1,1 +1,4 @@
 OBS\.*/
+last-make-local.log
+.*.swp
+*/.*.swp

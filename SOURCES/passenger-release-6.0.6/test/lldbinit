@@ -1,0 +1,6 @@
+settings set target.x86-disassembly-flavor intel
+breakpoint set -F main
+b malloc_error_break
+b Passenger::breakpoint
+target stop-hook add --one-liner 'process handle -n false -p true -s false SIGPIPE'
+target stop-hook add --one-liner 'process handle -n false -p true -s false SIGUSR1'

@@ -1,0 +1,13 @@
+LoadModule passenger_module @PASSENGERSO@
+<IfModule mod_passenger.c>
+   PassengerRoot @PASSENGERROOT@
+   PassengerEnabled off
+   # NOTE: Disabling this directive will allow users to
+   # set Passenger directives in their .htaccess files.
+   # This will allow them to bypass the 'MAXPASSENGERAPPS' limits
+   # enforced by the "Application Manager" feature.
+   PassengerDisableHtaccess on
+   PassengerDefaultRuby @PASSENGERDEFAULTRUBY@
+   PassengerDisableSecurityUpdateCheck on
+   PassengerInstanceRegistryDir @PASSENGERINSTANCEDIR@
+</IfModule>
