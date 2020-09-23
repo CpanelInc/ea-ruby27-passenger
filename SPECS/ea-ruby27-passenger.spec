@@ -43,7 +43,7 @@ Group: System Environment/Daemons
 License: Boost and BSD and BSD with advertising and MIT and zlib
 URL: https://www.phusionpassenger.com
 
-# http://s3.amazonaws.com/phusion-passenger/releases/passenger-%{version}.tar.gz
+# http://s3.amazonaws.com/phusion-passenger/releases/passenger-%%{version}.tar.gz
 Source: passenger-%{version}.tar.gz
 Source1: passenger.logrotate
 Source2: rubygem-passenger.tmpfiles
@@ -82,24 +82,43 @@ BuildRequires: %{?scl:%scl_prefix}rubygems-devel
 BuildRequires: %{?scl:%scl_prefix}rubygem(rake) >= 0.8.1
 BuildRequires: %{?scl:%scl_prefix}rubygem(rack)
 # Required for testing, but tests are disabled cause they failed.
-#BuildRequires: %{?scl:%scl_prefix}rubygem(rspec)
-#BuildRequires: %{?scl:%scl_prefix}rubygem(mime-types)
 BuildRequires: %{?scl:%scl_prefix}rubygem(sqlite3)
 BuildRequires: %{?scl:%scl_prefix}rubygem(mizuho)
 
 %if 0%{?rhel} < 8
 BuildRequires: ea-libcurl >= %{ea_libcurl_ver}
 BuildRequires: ea-libcurl-devel >= %{ea_libcurl_ver}
-%else
-BuildRequires: libcurl
-BuildRequires: libcurl-devel
-%endif
-
 BuildRequires: ea-brotli ea-brotli-devel
-BuildRequires: zlib-devel
-BuildRequires: pcre-devel
 BuildRequires: ea-openssl11 >= %{ea_openssl_ver}
 BuildRequires: ea-openssl11-devel >= %{ea_openssl_ver}
+%else
+BuildRequires: curl
+BuildRequires: libcurl
+BuildRequires: libcurl-devel
+BuildRequires: brotli
+BuildRequires: brotli-devel
+BuildRequires: openssl-devel
+BuildRequires: libnghttp2
+BuildRequires: python2
+Requires: python2
+%endif
+
+%if 0%{?rhel} >= 8
+# NOTE: our macros.scl insists that I use python3.  Too much risk on the
+# scripts
+%global __os_install_post %{expand:
+    /usr/lib/rpm/brp-scl-compress %{_scl_root}
+    %{!?__debug_package:/usr/lib/rpm/brp-strip %{__strip}
+    /usr/lib/rpm/brp-strip-comment-note %{__strip} %{__objdump}
+    }
+    /usr/lib/rpm/brp-strip-static-archive %{__strip}
+    /usr/lib/rpm/brp-scl-python-bytecompile /usr/bin/python2 %{?_python_bytecompile_errors_terminate_build} %{_scl_root}
+    /usr/lib/rpm/brp-python-hardlink
+%{nil}}
+%endif
+
+BuildRequires: zlib-devel
+BuildRequires: pcre-devel
 BuildRequires: %{?scl:%scl_prefix}libuv-devel
 
 BuildRequires: scl-utils
@@ -109,11 +128,12 @@ BuildRequires: scl-utils-build
 
 %if 0%{?rhel} < 8
 Requires: ea-libcurl >= %{ea_libcurl_ver}
+Requires: ea-openssl11 >= %{ea_openssl_ver}
 %else
 Requires: libcurl
+Requires: openssl
 %endif
 
-Requires: ea-openssl11 >= %{ea_openssl_ver}
 Provides: bundled(boost) = %{bundled_boost_version}
 
 # Suppress auto-provides for module DSO
@@ -176,6 +196,7 @@ rm -rf src/cxx_supportlib/vendor-modified/libuv
 # Find files with a hash-bang that do not have executable permissions
 for script in `find . -type f ! -perm /a+x -name "*.rb"`; do
     [ ! -z "`head -n 1 $script | grep \"^#!/\"`" ] && chmod -v 755 $script
+    /bin/true
 done
 
 %build
@@ -195,7 +216,9 @@ echo "BUILD: 004"
 %if 0%{?rhel} < 8
 EXTRA_CXX_LDFLAGS="-L/opt/cpanel/ea-ruby27/root/usr/lib64 -L/opt/cpanel/ea-openssl11/%{_lib} -L/opt/cpanel/ea-brotli/%{_lib} -Wl,-rpath=/opt/cpanel/ea-openssl11/%{_lib} -Wl,-rpath=/opt/cpanel/libcurl/%{_lib}  -Wl,-rpath=%{_libdir},--enable-new-dtags "; export EXTRA_CXX_LDFLAGS;
 %else
-EXTRA_CXX_LDFLAGS="-L/opt/cpanel/ea-ruby27/root/usr/lib64 -L/opt/cpanel/ea-openssl11/%{_lib} -L/opt/cpanel/ea-brotli/%{_lib} -Wl,-rpath=/opt/cpanel/ea-openssl11/%{_lib} -Wl,-rpath=%{_libdir},--enable-new-dtags "; export EXTRA_CXX_LDFLAGS;
+echo "LIBDIR" %{_libdir}
+EXTRA_CXX_LDFLAGS="-L/opt/cpanel/ea-ruby27/root/usr/lib64 -L/usr/lib64 -lcurl -lssl -lcrypto -lgssapi_krb5 -lkrb5 -lk5crypto -lkrb5support -lssl -lcrypto -lssl -lcrypto -Wl,-rpath=%{_libdir},--enable-new-dtags -lssl -lcrypto -lssl -lcrypto -lssl -lcrypto -lssl -lcrypto -lssl -lcrypto "; export EXTRA_CXX_LDFLAGS;
+echo $EXTRA_CXX_LDFLAGS
 %endif
 echo "BUILD: 005"
 
@@ -206,7 +229,7 @@ echo "EXTRA_CXX_LDFLAGS" $EXTRA_CXX_LDFLAGS
 %if 0%{?rhel} < 8
 export EXTRA_CXXFLAGS="-I/opt/cpanel/ea-openssl11/include -I/opt/cpanel/libcurl/include -I/opt/cpanel/ea-ruby27/root/usr/include"
 %else
-export EXTRA_CXXFLAGS="-I/opt/cpanel/ea-openssl11/include -I/opt/cpanel/ea-ruby27/root/usr/include"
+export EXTRA_CXXFLAGS="-I/opt/cpanel/ea-ruby27/root/usr/include -I/usr/include"
 %endif
 
 echo "BUILD: 007"
@@ -229,6 +252,14 @@ rake fakeroot \
 
 %{?scl:EOF}
 echo "BUILD: 009"
+
+# find python and ruby scripts to change their shebang
+
+echo "Python"
+find . -name "*.py" -print | xargs sed -i '1s:^#!.*python.*$:#!/usr/bin/python2:' 
+
+echo "Ruby"
+find . -name "*.py" -print | xargs sed -i '1s:^#!.*ruby.*$:#!/opt/cpanel/ea-ruby27/root/usr/bin/ruby:' 
 
 %install
 
