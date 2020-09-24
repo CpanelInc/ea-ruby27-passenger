@@ -54,6 +54,7 @@ Source12: config.json
 # in rhel7 to allow enabling extra SCLs.
 Source13: ea-ruby27
 Source14: passenger_apps.default
+Source15: update_ruby_shebang.pl 
 
 # Use upstream libuv instead of the bundled libuv
 Patch0:         0001-Patch-build-files-to-use-SCL-libuv-paths.patch
@@ -84,6 +85,8 @@ BuildRequires: %{?scl:%scl_prefix}rubygem(rack)
 # Required for testing, but tests are disabled cause they failed.
 BuildRequires: %{?scl:%scl_prefix}rubygem(sqlite3)
 BuildRequires: %{?scl:%scl_prefix}rubygem(mizuho)
+
+BuildRequires: perl
 
 %if 0%{?rhel} < 8
 BuildRequires: ea-libcurl >= %{ea_libcurl_ver}
@@ -188,6 +191,9 @@ Phusion Passenger application server for %{scl_prefix}.
 %patch5 -p1 -b .useeacurl
 %patch6 -p1 -b .disablehtaccess
 
+echo SOURCE15 %{SOURCE15}
+cp %{SOURCE15} .
+
 tar -xf %{SOURCE3}
 
 # Don't use bundled libuv
@@ -259,16 +265,26 @@ echo "Python"
 find . -name "*.py" -print | xargs sed -i '1s:^#!.*python.*$:#!/usr/bin/python2:' 
 
 echo "Ruby"
-find . -name "*.py" -print | xargs sed -i '1s:^#!.*ruby.*$:#!/opt/cpanel/ea-ruby27/root/usr/bin/ruby:' 
+find . -name "*.rb" -print | xargs sed -i '1s:^#!.*ruby.*$:#!/opt/cpanel/ea-ruby27/root/usr/bin/ruby:' 
+
+echo "BUILD: 010"
+find . -type f -print
+echo "BUILD: END"
 
 %install
+
+echo "INSTALL: 001"
 
 echo "TREE"
 find . -type f -print
 
+echo "INSTALL: 002"
+
 mkdir -p %{buildroot}/opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 tar xzf %{SOURCE0} -C %{buildroot}/opt/cpanel/ea-ruby27/src/
 tar xzf %{SOURCE3} -C %{buildroot}/opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
+
+echo "INSTALL: 003"
 
 %{?scl:scl enable ea-ruby27 - << \EOF}
 export USE_VENDORED_LIBEV=true
@@ -358,6 +374,22 @@ rm -rf %{buildroot}%{_bindir}/passenger-install-*-module
 mkdir -p %{buildroot}%{ruby_vendorlibdir}/passenger
 cp %{buildroot}/%{passenger_archdir}/*.so %{buildroot}%{ruby_vendorlibdir}/passenger/
 
+echo "INSTALL: 098"
+echo ruby_vendorlibdir %{ruby_vendorlibdir}
+find %{buildroot}/opt/cpanel/ea-ruby27/root/usr  -type f -print
+
+cp passenger.gemspec %{buildroot}/opt/root/usr/share/gems/gems/ruby-*/specifications
+cp passenger.gemspec %{buildroot}/opt/root/usr/share/ruby/gems/ruby-*/specifications
+
+
+echo "INSTALL: 099"
+echo "Ruby"
+
+cd %{buildroot}/opt/cpanel/ea-ruby27/src
+echo %{SOURCE15}
+perl %{SOURCE15}
+cd -
+
 %check
 %{?scl:scl enable ea-ruby27 - << \EOF}
 export USE_VENDORED_LIBEV=true
@@ -393,6 +425,8 @@ export USE_VENDORED_LIBUV=false
 %{_sbindir}/*
 %{_mandir}/man1/*
 %{_mandir}/man8/*
+/opt/root/usr/share/gems/gems/ruby-*/specifications
+/opt/root/usr/share/ruby/gems/ruby-*/specifications
 
 %files -n %{?scl:%scl_prefix}ruby-wrapper
 %doc LICENSE CONTRIBUTORS CHANGELOG
