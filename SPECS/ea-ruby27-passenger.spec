@@ -378,10 +378,6 @@ echo "INSTALL: 098"
 echo ruby_vendorlibdir %{ruby_vendorlibdir}
 find %{buildroot}/opt/cpanel/ea-ruby27/root/usr  -type f -print
 
-cp passenger.gemspec %{buildroot}/opt/root/usr/share/gems/gems/ruby-*/specifications
-cp passenger.gemspec %{buildroot}/opt/root/usr/share/ruby/gems/ruby-*/specifications
-
-
 echo "INSTALL: 099"
 echo "Ruby"
 
