@@ -421,8 +421,6 @@ export USE_VENDORED_LIBUV=false
 %{_sbindir}/*
 %{_mandir}/man1/*
 %{_mandir}/man8/*
-/opt/root/usr/share/gems/gems/ruby-*/specifications
-/opt/root/usr/share/ruby/gems/ruby-*/specifications
 
 %files -n %{?scl:%scl_prefix}ruby-wrapper
 %doc LICENSE CONTRIBUTORS CHANGELOG
