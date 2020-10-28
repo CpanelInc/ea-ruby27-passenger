@@ -19,7 +19,7 @@ index 8f9cbe7..2e92968 100644
  	const char *temp_dir = getenv("TMPDIR");
  	if (temp_dir == NULL || *temp_dir == '\0') {
 -		temp_dir = "/tmp";
-+		temp_dir = "/var/run/ea-ruby24-passenger";
++		temp_dir = "/var/run/ea-ruby27-passenger";
  	}
  	return temp_dir;
  }
@@ -32,7 +32,7 @@ index cafa69f..c4d9cf4 100644
          end
        end
 -      return "/tmp"
-+      return "/var/run/ea-ruby24-passenger"
++      return "/var/run/ea-ruby27-passenger"
      end
  
      def self.process_is_alive?(pid)

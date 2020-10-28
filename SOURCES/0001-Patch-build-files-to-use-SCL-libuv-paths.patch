@@ -23,8 +23,8 @@ index 7e8cd4e..7f30f5b 100644
  
 -  let(:libuv_cflags) { string_option('LIBUV_CFLAGS', '-I/usr/include/libuv') }
 -  let(:libuv_libs) { string_option('LIBUV_LIBS', '-luv') }
-+  let(:libuv_cflags) { string_option('LIBUV_CFLAGS', '-I/opt/cpanel/ea-ruby24/root/usr/include/') }
-+  let(:libuv_libs) { string_option('LIBUV_LIBS', '-L/opt/cpanel/ea-ruby24/root/usr/lib64 -luv') }
++  let(:libuv_cflags) { string_option('LIBUV_CFLAGS', '-I/opt/cpanel/ea-ruby27/root/usr/include/') }
++  let(:libuv_libs) { string_option('LIBUV_LIBS', '-L/opt/cpanel/ea-ruby27/root/usr/lib64 -luv') }
  
    task :libuv  # do nothing
  end
