@@ -220,7 +220,7 @@ CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
 CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
 echo "BUILD: 004"
 %if 0%{?rhel} < 8
-EXTRA_CXX_LDFLAGS="-L/opt/cpanel/ea-ruby27/root/usr/lib64 -L/opt/cpanel/ea-openssl11/%{_lib} -L/opt/cpanel/ea-brotli/%{_lib} -Wl,-rpath=/opt/cpanel/ea-openssl11/%{_lib} -Wl,-rpath=/opt/cpanel/libcurl/%{_lib}  -Wl,-rpath=%{_libdir},--enable-new-dtags "; export EXTRA_CXX_LDFLAGS;
+EXTRA_CXX_LDFLAGS="-L/opt/cpanel/ea-ruby27/root/usr/lib64 -L/opt/cpanel/ea-openssl11/%{_lib} -L/opt/cpanel/ea-brotli/%{_lib} -Wl,-rpath=/opt/cpanel/ea-openssl11/%{_lib} -Wl,-rpath=/opt/cpanel/ea-brotli/%{_lib} -Wl,-rpath=/opt/cpanel/libcurl/%{_lib}  -Wl,-rpath=%{_libdir},--enable-new-dtags "; export EXTRA_CXX_LDFLAGS;
 %else
 echo "LIBDIR" %{_libdir}
 EXTRA_CXX_LDFLAGS="-L/opt/cpanel/ea-ruby27/root/usr/lib64 -L/usr/lib64 -lcurl -lssl -lcrypto -lgssapi_krb5 -lkrb5 -lk5crypto -lkrb5support -lssl -lcrypto -lssl -lcrypto -Wl,-rpath=%{_libdir},--enable-new-dtags -lssl -lcrypto -lssl -lcrypto -lssl -lcrypto -lssl -lcrypto -lssl -lcrypto "; export EXTRA_CXX_LDFLAGS;
