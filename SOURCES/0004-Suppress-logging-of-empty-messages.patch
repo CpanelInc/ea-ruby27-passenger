@@ -1,0 +1,23 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Tim Mullin <tim@cpanel.net>
+Date: Mon, 30 Mar 2020 11:08:31 -0500
+Subject: [PATCH 4/7] Suppress logging of empty messages
+
+---
+ src/cxx_supportlib/LoggingKit/Implementation.cpp | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/cxx_supportlib/LoggingKit/Implementation.cpp b/src/cxx_supportlib/LoggingKit/Implementation.cpp
+index 710a8d4..a2adff7 100644
+--- a/src/cxx_supportlib/LoggingKit/Implementation.cpp
++++ b/src/cxx_supportlib/LoggingKit/Implementation.cpp
+@@ -441,6 +441,9 @@ logAppOutput(const HashedStaticString &groupName, pid_t pid, const StaticString
+ 	bool saveLog = false;
+ 	bool prefixLogs = true;
+ 
++    if (size == 0) {
++        return;
++    }
+ 	if (OXT_LIKELY(context != NULL)) {
+ 		const ConfigRealization *configRealization = context->getConfigRealization();
+ 		if (configRealization->level < configRealization->appOutputLogLevel) {

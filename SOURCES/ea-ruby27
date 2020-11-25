@@ -1,0 +1,4 @@
+#!/bin/bash
+
+COMMAND="ruby $@"
+exec /usr/bin/scl enable ea-ruby27 "$COMMAND"
