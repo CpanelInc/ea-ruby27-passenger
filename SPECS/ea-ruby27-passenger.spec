@@ -20,7 +20,7 @@
 %define ruby_vendorlibdir   %(scl enable ea-ruby27 "ruby -rrbconfig -e 'puts RbConfig::CONFIG[%q|vendorlibdir|]'")
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 1
+%define release_prefix 2
 
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
 %global _httpd_confdir     %{_root_sysconfdir}/apache2/conf.d
@@ -82,6 +82,7 @@ BuildRequires: %{?scl:%scl_prefix}rubygems
 BuildRequires: %{?scl:%scl_prefix}rubygems-devel
 BuildRequires: %{?scl:%scl_prefix}rubygem(rake) >= 0.8.1
 BuildRequires: %{?scl:%scl_prefix}rubygem(rack)
+Requires: %{?scl:%scl_prefix}rubygem(rack)
 # Required for testing, but tests are disabled cause they failed.
 BuildRequires: %{?scl:%scl_prefix}rubygem(sqlite3)
 BuildRequires: %{?scl:%scl_prefix}rubygem(mizuho)
@@ -439,6 +440,9 @@ export USE_VENDORED_LIBUV=false
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Tue Dec 01 2020 Julian Brown <julian.brown@cpanel.net> - 6.0.6-2
+- ZC-7974: Require rack
+
 * Tue Sep 08 2020 Julian Brown <julian.brown@cpanel.net> - 6.0.6-1
 - ZC-7508: Initial Commit
 
