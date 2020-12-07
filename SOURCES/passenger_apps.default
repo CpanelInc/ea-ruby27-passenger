@@ -14,7 +14,17 @@
         PassengerBaseURI "[% data.base_uri %]"
         PassengerAppRoot "[% data.path %]"
         PassengerAppGroupName "[% data.cpuser _ ' - ' _ data.name %]"
+        [%- IF data.ruby %]
+        PassengerRuby [% data.ruby %]
+        [%- END %]
+        [%- IF data.python %]
+        PassengerPython [% data.python %]
+        [%- END %]
+        [%- IF data.nodejs %]
+        PassengerNodejs [% data.nodejs %]
+        [%- ELSE %]
         PassengerNodejs /opt/cpanel/ea-nodejs10/bin/node
+        [%- END %]
     </IfModule>
 </Location>
 <Directory "[% data.path %]">

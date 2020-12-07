@@ -20,7 +20,7 @@
 %define ruby_vendorlibdir   %(scl enable ea-ruby27 "ruby -rrbconfig -e 'puts RbConfig::CONFIG[%q|vendorlibdir|]'")
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 4
+%define release_prefix 5
 
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
 %global _httpd_confdir     %{_root_sysconfdir}/apache2/conf.d
@@ -316,7 +316,13 @@ sed -i 's|@PASSENGERSO@|%{_httpd_moddir}/mod_passenger.so|g' passenger.conf
 sed -i 's|@PASSENGERINSTANCEDIR@|%{_localstatedir}/run/passenger-instreg|g' passenger.conf
 
 mkdir -p %{buildroot}/var/cpanel/templates/apache2_4
+# keep version agnostic name for old ULCs :(
 install -m 0640 %{SOURCE14} %{buildroot}/var/cpanel/templates/apache2_4/passenger_apps.default
+# have version/package specific name for new ULCs :)
+install -m 0640 %{SOURCE14} %{buildroot}/var/cpanel/templates/apache2_4/ruby27-mod_passenger.appconf.default
+
+mkdir -p %{buildroot}/etc/cpanel/ea4
+echo -n 27 > %{buildroot}/etc/cpanel/ea4/passenger.ruby
 
 %if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
     sed -n /^LoadModule/p passenger.conf > 10-passenger.conf
@@ -439,10 +445,15 @@ export USE_VENDORED_LIBUV=false
 %config(noreplace) %{_httpd_confdir}/*.conf
 %endif
 /var/cpanel/templates/apache2_4/passenger_apps.default
+/var/cpanel/templates/apache2_4/ruby27-mod_passenger.appconf.default
+/etc/cpanel/ea4/passenger.ruby
 %{_httpd_moddir}/mod_passenger.so
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Mon Dec 07 2020 Daniel Muey <dan@cpanel.net> - 6.0.6-5
+- ZC-7897: Add version/package specific template file (and support userdata paths like nginx)
+
 * Mon Dec 07 2020 Travis Holloway <t.holloway@cpanel.net> - 6.0.6-4
 - ZC-8082: Do not apply ea-libcurl patch on C8 builds
 
