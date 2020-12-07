@@ -20,7 +20,7 @@
 %define ruby_vendorlibdir   %(scl enable ea-ruby27 "ruby -rrbconfig -e 'puts RbConfig::CONFIG[%q|vendorlibdir|]'")
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 2
+%define release_prefix 3
 
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
 %global _httpd_confdir     %{_root_sysconfdir}/apache2/conf.d
@@ -54,7 +54,7 @@ Source12: config.json
 # in rhel7 to allow enabling extra SCLs.
 Source13: ea-ruby27
 Source14: passenger_apps.default
-Source15: update_ruby_shebang.pl 
+Source15: update_ruby_shebang.pl
 
 # Use upstream libuv instead of the bundled libuv
 Patch0:         0001-Patch-build-files-to-use-SCL-libuv-paths.patch
@@ -159,6 +159,8 @@ Requires: ea-apache24-mmn = %{_httpd_mmn}
 Requires: %{scl_prefix}ruby-wrapper
 Requires: %{name}%{?_isa} = %{version}-%{release}
 License: Boost and BSD and BSD with advertising and MIT and zlib
+Provides: apache24-passenger
+Conflicts: apache24-passenger
 
 %description -n %{scl_prefix}mod_passenger
 This package contains the pluggable Apache server module for Phusion Passenger(r).
@@ -263,10 +265,10 @@ echo "BUILD: 009"
 # find python and ruby scripts to change their shebang
 
 echo "Python"
-find . -name "*.py" -print | xargs sed -i '1s:^#!.*python.*$:#!/usr/bin/python2:' 
+find . -name "*.py" -print | xargs sed -i '1s:^#!.*python.*$:#!/usr/bin/python2:'
 
 echo "Ruby"
-find . -name "*.rb" -print | xargs sed -i '1s:^#!.*ruby.*$:#!/opt/cpanel/ea-ruby27/root/usr/bin/ruby:' 
+find . -name "*.rb" -print | xargs sed -i '1s:^#!.*ruby.*$:#!/opt/cpanel/ea-ruby27/root/usr/bin/ruby:'
 
 echo "BUILD: 010"
 find . -type f -print
@@ -440,6 +442,9 @@ export USE_VENDORED_LIBUV=false
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Mon Dec 07 2020 Daniel Muey <dan@cpanel.net> - 6.0.6-3
+- ZC-7655: Provide/Conflict `apache24-passenger`
+
 * Tue Dec 01 2020 Julian Brown <julian.brown@cpanel.net> - 6.0.6-2
 - ZC-7974: Require rack
 
