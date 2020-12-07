@@ -20,7 +20,7 @@
 %define ruby_vendorlibdir   %(scl enable ea-ruby27 "ruby -rrbconfig -e 'puts RbConfig::CONFIG[%q|vendorlibdir|]'")
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 3
+%define release_prefix 4
 
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
 %global _httpd_confdir     %{_root_sysconfdir}/apache2/conf.d
@@ -191,9 +191,10 @@ Phusion Passenger application server for %{scl_prefix}.
 %patch2 -p1 -b .nativelibdir
 %patch3 -p1 -b .emptymsglog
 %patch4 -p1 -b .instanceregpath
+%if 0%{?rhel} < 8
 %patch5 -p1 -b .useeacurl
+%endif
 %patch6 -p1 -b .disablehtaccess
-
 echo SOURCE15 %{SOURCE15}
 cp %{SOURCE15} .
 
@@ -442,6 +443,9 @@ export USE_VENDORED_LIBUV=false
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Mon Dec 07 2020 Travis Holloway <t.holloway@cpanel.net> - 6.0.6-4
+- ZC-8082: Do not apply ea-libcurl patch on C8 builds
+
 * Mon Dec 07 2020 Daniel Muey <dan@cpanel.net> - 6.0.6-3
 - ZC-7655: Provide/Conflict `apache24-passenger`
 
