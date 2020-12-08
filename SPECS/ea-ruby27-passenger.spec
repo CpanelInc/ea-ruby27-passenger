@@ -294,7 +294,7 @@ install -m 0640 %{SOURCE14} %{buildroot}/var/cpanel/templates/apache2_4/passenge
 install -m 0640 %{SOURCE14} %{buildroot}/var/cpanel/templates/apache2_4/ruby27-mod_passenger.appconf.default
 
 mkdir -p %{buildroot}/etc/cpanel/ea4
-echo -n 27 > %{buildroot}/etc/cpanel/ea4/passenger.ruby
+echo -n %{_libexecdir}/passenger-ruby27 > %{buildroot}/etc/cpanel/ea4/passenger.ruby
 
 %if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
     sed -n /^LoadModule/p passenger.conf > 10-passenger.conf
