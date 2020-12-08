@@ -195,7 +195,6 @@ Phusion Passenger application server for %{scl_prefix}.
 %patch5 -p1 -b .useeacurl
 %endif
 %patch6 -p1 -b .disablehtaccess
-echo SOURCE15 %{SOURCE15}
 cp %{SOURCE15} .
 
 tar -xf %{SOURCE3}
@@ -213,28 +212,19 @@ done
 # Build the complete Passenger and shared module against ruby27.
 
 %{?scl:scl enable ea-ruby27 - << \EOF}
-echo "BUILD: 001"
 export LD_LIBRARY_PATH=%{_libdir}:$LD_LIBRARY_PATH
-echo "BUILD: 002"
 export USE_VENDORED_LIBEV=true
 export USE_VENDORED_LIBUV=false
 export GEM_PATH=%{gem_dir}:${GEM_PATH:+${GEM_PATH}}${GEM_PATH:-`scl enable ea-ruby27 -- ruby -e "print Gem.path.join(':')"`}
-echo "BUILD: 003"
 CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
 CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
-echo "BUILD: 004"
 %if 0%{?rhel} < 8
 EXTRA_CXX_LDFLAGS="-L/opt/cpanel/ea-ruby27/root/usr/lib64 -L/opt/cpanel/ea-openssl11/%{_lib} -L/opt/cpanel/ea-brotli/%{_lib} -Wl,-rpath=/opt/cpanel/ea-openssl11/%{_lib} -Wl,-rpath=/opt/cpanel/ea-brotli/%{_lib} -Wl,-rpath=/opt/cpanel/libcurl/%{_lib}  -Wl,-rpath=%{_libdir},--enable-new-dtags "; export EXTRA_CXX_LDFLAGS;
 %else
-echo "LIBDIR" %{_libdir}
 EXTRA_CXX_LDFLAGS="-L/opt/cpanel/ea-ruby27/root/usr/lib64 -L/usr/lib64 -lcurl -lssl -lcrypto -lgssapi_krb5 -lkrb5 -lk5crypto -lkrb5support -lssl -lcrypto -lssl -lcrypto -Wl,-rpath=%{_libdir},--enable-new-dtags -lssl -lcrypto -lssl -lcrypto -lssl -lcrypto -lssl -lcrypto -lssl -lcrypto "; export EXTRA_CXX_LDFLAGS;
-echo $EXTRA_CXX_LDFLAGS
 %endif
-echo "BUILD: 005"
 
 FFLAGS="${FFLAGS:-%optflags}" ; export FFLAGS;
-echo "BUILD: 006"
-echo "EXTRA_CXX_LDFLAGS" $EXTRA_CXX_LDFLAGS
 
 %if 0%{?rhel} < 8
 export EXTRA_CXXFLAGS="-I/opt/cpanel/ea-openssl11/include -I/opt/cpanel/libcurl/include -I/opt/cpanel/ea-ruby27/root/usr/include"
@@ -242,11 +232,9 @@ export EXTRA_CXXFLAGS="-I/opt/cpanel/ea-openssl11/include -I/opt/cpanel/libcurl/
 export EXTRA_CXXFLAGS="-I/opt/cpanel/ea-ruby27/root/usr/include -I/usr/include"
 %endif
 
-echo "BUILD: 007"
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-echo "BUILD: 008"
 
 rake fakeroot \
     NATIVE_PACKAGING_METHOD=rpm \
@@ -261,34 +249,18 @@ rake fakeroot \
     APACHE2_MODULE_PATH=%{_httpd_moddir}/mod_passenger.so
 
 %{?scl:EOF}
-echo "BUILD: 009"
 
 # find python and ruby scripts to change their shebang
 
-echo "Python"
 find . -name "*.py" -print | xargs sed -i '1s:^#!.*python.*$:#!/usr/bin/python2:'
 
-echo "Ruby"
 find . -name "*.rb" -print | xargs sed -i '1s:^#!.*ruby.*$:#!/opt/cpanel/ea-ruby27/root/usr/bin/ruby:'
 
-echo "BUILD: 010"
-find . -type f -print
-echo "BUILD: END"
-
 %install
-
-echo "INSTALL: 001"
-
-echo "TREE"
-find . -type f -print
-
-echo "INSTALL: 002"
 
 mkdir -p %{buildroot}/opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 tar xzf %{SOURCE0} -C %{buildroot}/opt/cpanel/ea-ruby27/src/
 tar xzf %{SOURCE3} -C %{buildroot}/opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
-
-echo "INSTALL: 003"
 
 %{?scl:scl enable ea-ruby27 - << \EOF}
 export USE_VENDORED_LIBEV=true
@@ -384,15 +356,7 @@ rm -rf %{buildroot}%{_bindir}/passenger-install-*-module
 mkdir -p %{buildroot}%{ruby_vendorlibdir}/passenger
 cp %{buildroot}/%{passenger_archdir}/*.so %{buildroot}%{ruby_vendorlibdir}/passenger/
 
-echo "INSTALL: 098"
-echo ruby_vendorlibdir %{ruby_vendorlibdir}
-find %{buildroot}/opt/cpanel/ea-ruby27/root/usr  -type f -print
-
-echo "INSTALL: 099"
-echo "Ruby"
-
 cd %{buildroot}/opt/cpanel/ea-ruby27/src
-echo %{SOURCE15}
 perl %{SOURCE15}
 cd -
 
