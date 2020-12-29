@@ -406,6 +406,15 @@ if [ ! -f "%{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf" 
     fi
 fi
 
+%posttrans
+
+PERL=/usr/local/cpanel/3rdparty/bin/perl
+for appconf in $(ls /var/cpanel/userdata/*/applications.json); do
+    $PERL -MCpanel::JSON -e \
+      'my ($y, $r)=@ARGV;my $apps=eval {Cpanel::JSON::LoadFile($y)}; if ($@) { warn $@; exit 0 } for my $app (keys %{$apps}) { $apps->{$app}{ruby} //= $r } Cpanel::JSON::DumpFile($y, $apps)' \
+      $appconf /opt/cpanel/ea-ruby24/root/usr/libexec/passenger-ruby24
+done
+
 %files
 %doc LICENSE CONTRIBUTORS CHANGELOG
 %{_bindir}/passenger*
