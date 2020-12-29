@@ -389,7 +389,7 @@ export USE_VENDORED_LIBUV=false
 
 %pre
 
-if [ -e "/etc/cpnel/ea4/passenger.python" ] ; then
+if [ -e "/etc/cpanel/ea4/passenger.python" ] ; then
     mkdir -p %{_localstatedir}/lib/rpm-state/ea-ruby27-passenger
     touch %{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf
 fi
@@ -399,9 +399,9 @@ fi
 if [ ! -f "%{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf" ] ; then
     if [ ! -x "/usr/bin/python3" ] ; then
         if [ -x "/usr/bin/python" ] ; then
-            echo -n /usr/bin/python > /etc/cpnel/ea4/passenger.python
+            echo -n /usr/bin/python > /etc/cpanel/ea4/passenger.python
         else
-            echo -n "" > /etc/cpnel/ea4/passenger.python
+            echo -n "" > /etc/cpanel/ea4/passenger.python
         fi
     fi
 fi
