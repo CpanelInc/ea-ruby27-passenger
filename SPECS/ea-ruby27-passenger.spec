@@ -389,24 +389,39 @@ export USE_VENDORED_LIBUV=false
 
 %pre
 
-if [ -e "/etc/cpanel/ea4/passenger.python" ] ; then
-    mkdir -p %{_localstatedir}/lib/rpm-state/ea-ruby27-passenger
-    touch %{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf
+echo "DEBUG %pre $1";
+
+if [ -e "%{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf" ] ; then
+    unlink %{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf
 fi
 
-%post
-
-if [ ! -f "%{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf" ] ; then
-    if [ ! -x "/usr/bin/python3" ] ; then
-        if [ -x "/usr/bin/python" ] ; then
-            echo -n /usr/bin/python > /etc/cpanel/ea4/passenger.python
-        else
-            echo -n "" > /etc/cpanel/ea4/passenger.python
-        fi
-    fi
+if [ -e "/etc/cpanel/ea4/passenger.python" ] ; then
+    echo "Has existing python configuration, will leave that as is …"
+    mkdir -p %{_localstatedir}/lib/rpm-state/ea-ruby27-passenger
+    touch %{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf
+else
+    echo "Will verify new python configuration …"
 fi
 
 %posttrans
+
+echo "DEBUG %posttrans $1";
+
+if [ ! -f "%{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf" ] ; then
+    echo "… Ensuring new python configuration is valid …";
+    if [ ! -x "/usr/bin/python3" ] ; then
+        echo "… no python3, trying python …"
+        if [ -x "/usr/bin/python" ] ; then
+            echo "… using python";
+            echo -n "/usr/bin/python" > /etc/cpanel/ea4/passenger.python
+        else
+            echo "… no python, removing value";
+            echo -n "" > /etc/cpanel/ea4/passenger.python
+        fi
+    fi
+else
+    echo "… using previous python configuration"
+fi
 
 PERL=/usr/local/cpanel/3rdparty/bin/perl
 for appconf in $(ls /var/cpanel/userdata/*/applications.json); do
