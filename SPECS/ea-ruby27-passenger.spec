@@ -423,12 +423,35 @@ else
     echo "… using previous python configuration"
 fi
 
+RESTART_NEEDED=0
 PERL=/usr/local/cpanel/3rdparty/bin/perl
 for appconf in $(ls /var/cpanel/userdata/*/applications.json); do
-    $PERL -MCpanel::JSON -e \
-      'my ($y, $r)=@ARGV;my $apps=eval {Cpanel::JSON::LoadFile($y)}; if ($@) { warn $@; exit 0 } for my $app (keys %{$apps}) { $apps->{$app}{ruby} //= $r } Cpanel::JSON::DumpFile($y, $apps)' \
-      $appconf /opt/cpanel/ea-ruby24/root/usr/libexec/passenger-ruby24
+    REGEN_USER=`$PERL -MCpanel::JSON -e \
+      'my ($y, $r)=@ARGV;my $u="";my $apps=eval {Cpanel::JSON::LoadFile($y)}; if ($@) { warn $@; exit 0 } for my $app (keys %{$apps}) { if(!$apps->{$app}{ruby}) { $apps->{$app}{ruby} = $r;if(!$u) { $u=$y;$u=~ s{/[^/]+$}{};$p=~s{/var/cpanel/userdata/}{}; } } Cpanel::JSON::DumpFile($y, $apps);print $u' \
+      $appconf /opt/cpanel/ea-ruby24/root/usr/libexec/passenger-ruby24`
+
+    if [ -s "$REGEN_USER" ]; then
+      MADE_CHANGES=`$PERL -MCpanel::Config::userdata::PassengerApps -e \
+        'my $ch=0;my $obj=Cpanel::Config::userdata::PassengerApps->new({user=>$ARGV[0]});my $apps=$obj->list_applications();for my $name (keys %{$apps}) {my $data=$apps->{$name};if ($data->{enabled}) {$obj->generate_apache_conf($name);$ch++;}}print $ch;' \
+        $REGEN_USER`
+
+        if [ -v "$MADE_CHANGES" ]; then
+            RESTART_NEEDED=1
+
+            if [ -x "/usr/local/cpanel/scripts/ea-nginx" ]; then
+                /usr/local/cpanel/scripts/ea-nginx config $REGEN_USER --no-reload
+            fi
+        fi
+    fi
 done
+
+if [ -v "$RESTART_NEEDED" ]; then
+   /usr/local/cpanel/scripts/restartsrv_httpd --restart
+
+   if [ -x "/usr/local/cpanel/scripts/ea-nginx" ]; then
+       /usr/local/cpanel/scripts/ea-nginx reload
+   fi
+fi
 
 %files
 %doc LICENSE CONTRIBUTORS CHANGELOG
