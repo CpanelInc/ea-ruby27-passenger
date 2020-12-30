@@ -387,9 +387,7 @@ export USE_VENDORED_LIBUV=false
 # rake test:cxx || true
 %{?scl:EOF}
 
-%pre
-
-echo "DEBUG %pre $1";
+%pre -n %{scl_prefix}mod_passenger
 
 if [ -e "%{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf" ] ; then
     unlink %{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf
@@ -403,9 +401,7 @@ else
     echo "Will verify new python configuration …"
 fi
 
-%posttrans
-
-echo "DEBUG %posttrans $1";
+%posttrans -n %{scl_prefix}mod_passenger
 
 if [ ! -f "%{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf" ] ; then
     echo "… Ensuring new python configuration is valid …";
