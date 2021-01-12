@@ -20,7 +20,7 @@
 %define ruby_vendorlibdir   %(scl enable ea-ruby27 "ruby -rrbconfig -e 'puts RbConfig::CONFIG[%q|vendorlibdir|]'")
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 5
+%define release_prefix 6
 
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
 %global _httpd_confdir     %{_root_sysconfdir}/apache2/conf.d
@@ -296,6 +296,13 @@ install -m 0640 %{SOURCE14} %{buildroot}/var/cpanel/templates/apache2_4/ruby27-m
 mkdir -p %{buildroot}/etc/cpanel/ea4
 echo -n %{_libexecdir}/passenger-ruby27 > %{buildroot}/etc/cpanel/ea4/passenger.ruby
 
+# do python3 (and not worry about systems w/ only /usr/bin/python) because:
+#    1. python3 is not EOL
+#    2. /usr/bin/python is no longer a thing in python land
+#    3. if they didn't have this configure their python app is broken anyway
+#    4. They can configure this if they really want /usr/bin/python, /usr/bin/python2, /usr/bin/python3.6, etc
+echo -n "/usr/bin/python3" > %{buildroot}/etc/cpanel/ea4/passenger.python
+
 %if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
     sed -n /^LoadModule/p passenger.conf > 10-passenger.conf
     sed -i /^LoadModule/d passenger.conf
@@ -380,6 +387,67 @@ export USE_VENDORED_LIBUV=false
 # rake test:cxx || true
 %{?scl:EOF}
 
+%pre -n %{scl_prefix}mod_passenger
+
+if [ -e "%{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf" ] ; then
+    unlink %{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf
+fi
+
+if [ -e "/etc/cpanel/ea4/passenger.python" ] ; then
+    echo "Has existing python configuration, will leave that as is …"
+    mkdir -p %{_localstatedir}/lib/rpm-state/ea-ruby27-passenger
+    touch %{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf
+else
+    echo "Will verify new python configuration …"
+fi
+
+%posttrans -n %{scl_prefix}mod_passenger
+
+if [ ! -f "%{_localstatedir}/lib/rpm-state/ea-ruby27-passenger/has_python_conf" ] ; then
+    echo "… Ensuring new python configuration is valid …";
+    if [ ! -x "/usr/bin/python3" ] ; then
+        echo "… no python3, trying python …"
+        if [ -x "/usr/bin/python" ] ; then
+            echo "… using python";
+            echo -n "/usr/bin/python" > /etc/cpanel/ea4/passenger.python
+        else
+            echo "… no python, removing value";
+            echo -n "" > /etc/cpanel/ea4/passenger.python
+        fi
+    fi
+else
+    echo "… using previous python configuration"
+fi
+
+RESTART_NEEDED=""
+PERL=/usr/local/cpanel/3rdparty/bin/perl
+UPDATE_USERDATA='my ($y, $r)=@ARGV;my $u="";my $apps=eval {Cpanel::JSON::LoadFile($y)}; if ($@) { warn $@; exit 0 } for my $app (keys %{$apps}) { if(!$apps->{$app}{ruby}) { $apps->{$app}{ruby} = $r;if(!$u) { $u=$y;$u=~ s{/[^/]+$}{};$u=~s{/var/cpanel/userdata/}{}; } } } Cpanel::JSON::DumpFile($y, $apps);print $u'
+UPDATE_INCLUDES='my $ch="";my $obj=Cpanel::Config::userdata::PassengerApps->new({user=>$ARGV[0]});my $apps=$obj->list_applications();for my $name (keys %{$apps}) {my $data=$apps->{$name};if ($data->{enabled}) {$obj->generate_apache_conf($name);$ch++;}}print $ch;'
+
+for appconf in $(ls /var/cpanel/userdata/*/applications.json); do
+    REGEN_USER=$($PERL -MCpanel::JSON -e "$UPDATE_USERDATA" $appconf /opt/cpanel/ea-ruby24/root/usr/libexec/passenger-ruby24)
+
+    if [ ! -z "$REGEN_USER" ]; then
+        MADE_CHANGES=$($PERL -MCpanel::Config::userdata::PassengerApps -e "$UPDATE_INCLUDES" $REGEN_USER)
+
+        if [ ! -z "$MADE_CHANGES" ]; then
+            RESTART_NEEDED=1
+
+            if [ -x "/usr/local/cpanel/scripts/ea-nginx" ]; then
+                /usr/local/cpanel/scripts/ea-nginx config $REGEN_USER --no-reload
+            fi
+        fi
+    fi
+done
+
+if [ ! -z "$RESTART_NEEDED" ]; then
+   /usr/local/cpanel/scripts/restartsrv_httpd --restart
+
+   if [ -x "/usr/local/cpanel/scripts/ea-nginx" ]; then
+       /usr/local/cpanel/scripts/ea-nginx reload
+   fi
+fi
+
 %files
 %doc LICENSE CONTRIBUTORS CHANGELOG
 %{_bindir}/passenger*
@@ -411,10 +479,14 @@ export USE_VENDORED_LIBUV=false
 /var/cpanel/templates/apache2_4/passenger_apps.default
 /var/cpanel/templates/apache2_4/ruby27-mod_passenger.appconf.default
 /etc/cpanel/ea4/passenger.ruby
+%config(noreplace) /etc/cpanel/ea4/passenger.python
 %{_httpd_moddir}/mod_passenger.so
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Mon Dec 28 2020 Daniel Muey <dan@cpanel.net> - 6.0.6-6
+- ZC-8188: provide `/etc/cpanel/ea4/passenger.python`
+
 * Mon Dec 07 2020 Daniel Muey <dan@cpanel.net> - 6.0.6-5
 - ZC-7897: Add version/package specific template file (and support userdata paths like nginx)
 
