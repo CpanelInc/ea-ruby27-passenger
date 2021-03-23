@@ -44,7 +44,7 @@ Date:   Thu Jun 15 13:23:10 2017 -0500
  4 files changed, 23 insertions(+)
 
 diff --git a/src/apache2_module/Config.cpp b/src/apache2_module/Config.cpp
-index a50c6d2..4ce3568 100644
+index 86b0a63..e012f99 100644
 --- a/src/apache2_module/Config.cpp
 +++ b/src/apache2_module/Config.cpp
 @@ -232,6 +232,12 @@ cmd_passenger_base_uri(cmd_parms *cmd, void *pcfg, const char *arg) {
@@ -92,7 +92,7 @@ index 7884f5a..101f479 100644
  		config["admin_panel_url"] = nonEmptyString(serverConfig.adminPanelUrl);
  		config["admin_panel_auth_type"] = nonEmptyString(serverConfig.adminPanelAuthType);
 diff --git a/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb b/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb
-index 37f63f7..919acce 100644
+index 933d12d..8e77c24 100644
 --- a/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb
 +++ b/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb
 @@ -277,6 +277,14 @@

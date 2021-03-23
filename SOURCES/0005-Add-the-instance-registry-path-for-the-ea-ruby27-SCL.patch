@@ -9,7 +9,7 @@ Subject: [PATCH 5/7] Add the instance registry path for the ea-ruby27 SCL path
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb b/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
-index b987534..e194875 100644
+index b987534..edca31c 100644
 --- a/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
 +++ b/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
 @@ -102,7 +102,7 @@ def default_paths
