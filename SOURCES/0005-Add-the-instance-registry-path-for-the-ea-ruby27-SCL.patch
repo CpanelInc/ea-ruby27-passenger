@@ -1,23 +1,26 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Rishwanth Yeddula <rish@cpanel.net>
-Date: Fri, 21 Apr 2017 17:04:30 -0500
+From 07f0eb882d5c2a0285841df39a718fdf3aa94a6f Mon Sep 17 00:00:00 2001
+From: Julian Brown <julian.brown@cpanel.net>
+Date: Wed, 2 Jun 2021 10:12:18 -0500
 Subject: [PATCH 5/7] Add the instance registry path for the ea-ruby27 SCL path
- to the default list
 
+to the default list
 ---
  .../phusion_passenger/admin_tools/instance_registry.rb          | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb b/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
-index b987534..edca31c 100644
+index 0a846b7..c4b8701 100644
 --- a/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
 +++ b/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
-@@ -102,7 +102,7 @@ def default_paths
+@@ -105,7 +105,7 @@ def default_paths
          #
-         # The RPM packages configure Apache and Nginx to use /var/run/passenger-instreg
-         # as the instance registry dir. See https://github.com/phusion/passenger/issues/1475
--        [string_env("TMPDIR"), "/tmp", "/var/run/passenger-instreg"].compact
-+        [string_env("TMPDIR"), "/tmp", "/var/run/passenger-instreg", "/opt/cpanel/ea-ruby27/root/usr/var/run/passenger-instreg"].compact
+         # systemd's PrivateTmp feature works like an inverted OSX, apache gets its own
+         # TMPDIR and users use /tmp
+-        [string_env("TMPDIR"), "/tmp", "/var/run/passenger-instreg",*Dir['/tmp/systemd-private-*-{httpd,nginx}.service-*/tmp']].compact
++        [string_env("TMPDIR"), "/tmp", "/var/run/passenger-instreg", "/opt/cpanel/ea-ruby27/root/usr/var/run/passenger-instreg", *Dir['/tmp/systemd-private-*-{httpd,nginx}.service-*/tmp']].compact
        end
  
        def string_env(name)
+-- 
+2.31.1
+
