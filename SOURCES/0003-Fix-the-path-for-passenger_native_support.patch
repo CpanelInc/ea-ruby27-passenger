@@ -1,4 +1,4 @@
-From 845443799ce06ddeb0f9660182d0c525ff544e0c Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Julian Brown <julian.brown@cpanel.net>
 Date: Wed, 2 Jun 2021 10:07:38 -0500
 Subject: [PATCH 3/7] Fix the path for passenger_native_support
@@ -22,6 +22,3 @@ index 8c18b46..1114530 100644
      rescue LoadError
        return false
      end
--- 
-2.31.1
-

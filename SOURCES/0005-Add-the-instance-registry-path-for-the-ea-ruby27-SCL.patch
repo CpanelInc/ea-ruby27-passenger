@@ -1,4 +1,4 @@
-From 07f0eb882d5c2a0285841df39a718fdf3aa94a6f Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Julian Brown <julian.brown@cpanel.net>
 Date: Wed, 2 Jun 2021 10:12:18 -0500
 Subject: [PATCH 5/7] Add the instance registry path for the ea-ruby27 SCL path
@@ -21,6 +21,3 @@ index 0a846b7..c4b8701 100644
        end
  
        def string_env(name)
--- 
-2.31.1
-
