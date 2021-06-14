@@ -1,6 +1,6 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Rishwanth Yeddula <rish@cpanel.net>
-Date: Wed, 28 Mar 2018 14:46:31 -0500
+From ac038653e99b448c2f8dcab1ee361aa9b42cdbe3 Mon Sep 17 00:00:00 2001
+From: Julian Brown <julian.brown@cpanel.net>
+Date: Wed, 2 Jun 2021 10:13:13 -0500
 Subject: [PATCH 6/7] Use ea-libcurl instead of system curl
 
 ---
@@ -43,3 +43,6 @@ index 52dec20..651760f 100644
        return features =~ /SSL/
      end
      memoize :curl_supports_ssl?
+-- 
+2.31.1
+

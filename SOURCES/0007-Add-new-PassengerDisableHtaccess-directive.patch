@@ -1,6 +1,6 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Tim Mullin <tim@cpanel.net>
-Date: Mon, 30 Mar 2020 13:33:01 -0500
+From b9efe342d00186715f158ee170084dc24ad37933 Mon Sep 17 00:00:00 2001
+From: Julian Brown <julian.brown@cpanel.net>
+Date: Wed, 2 Jun 2021 10:13:57 -0500
 Subject: [PATCH 7/7] Add new 'PassengerDisableHtaccess' directive
 
 The original patch for this had to be changed since the
@@ -110,3 +110,6 @@ index 933d12d..8e77c24 100644
    {
      :name      => 'PassengerShowVersionInHeader',
      :type      => :flag,
+-- 
+2.31.1
+

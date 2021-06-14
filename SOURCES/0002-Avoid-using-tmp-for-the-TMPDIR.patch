@@ -1,6 +1,6 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Rishwanth Yeddula <rish@cpanel.net>
-Date: Mon, 17 Apr 2017 12:13:01 -0500
+From 2d3a4c46d82c83fbec80eb08fc00df15c0aa027d Mon Sep 17 00:00:00 2001
+From: Julian Brown <julian.brown@cpanel.net>
+Date: Wed, 2 Jun 2021 10:06:34 -0500
 Subject: [PATCH 2/7] Avoid using /tmp for the TMPDIR
 
 Adopted from the passenger-4.0.50-tmpdir patch from the rh-passenger40
@@ -24,15 +24,18 @@ index 8f9cbe7..c7b2499 100644
  	return temp_dir;
  }
 diff --git a/src/ruby_supportlib/phusion_passenger/admin_tools.rb b/src/ruby_supportlib/phusion_passenger/admin_tools.rb
-index cafa69f..2772fef 100644
+index f1432f2..82ed066 100644
 --- a/src/ruby_supportlib/phusion_passenger/admin_tools.rb
 +++ b/src/ruby_supportlib/phusion_passenger/admin_tools.rb
 @@ -31,7 +31,7 @@ def self.tmpdir
            return ENV[name]
          end
        end
--      return "/tmp"
-+      return "/var/run/ea-ruby27-passenger"
+-      return Dir['/tmp/systemd-private-*-{httpd,nginx}.service-*/tmp'].first || "/tmp"
++      return Dir['/tmp/systemd-private-*-{httpd,nginx}.service-*/tmp'].first || "/var/run/ea-ruby27-passenger"
      end
  
      def self.process_is_alive?(pid)
+-- 
+2.31.1
+

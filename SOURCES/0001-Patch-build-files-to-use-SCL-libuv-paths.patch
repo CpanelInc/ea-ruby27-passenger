@@ -1,6 +1,6 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Rishwanth Yeddula <rish@cpanel.net>
-Date: Sat, 15 Apr 2017 09:45:34 -0500
+From 76fbfc994728997867bca85756de4d8d44220b42 Mon Sep 17 00:00:00 2001
+From: Julian Brown <julian.brown@cpanel.net>
+Date: Wed, 2 Jun 2021 10:01:35 -0500
 Subject: [PATCH 1/7] Patch build files to use SCL libuv paths
 
 Adopted from the passenger-4.0.38-libeio patch from the rh-passenger40
@@ -14,7 +14,7 @@ therefore this patch only updates the libuv paths.
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/build/common_library.rb b/build/common_library.rb
-index 7e8cd4e..04640e4 100644
+index dbdd2f7..60cbff1 100644
 --- a/build/common_library.rb
 +++ b/build/common_library.rb
 @@ -236,8 +236,8 @@ def define_libboost_oxt_task(namespace, output_dir, extra_compiler_flags = nil)
@@ -28,3 +28,6 @@ index 7e8cd4e..04640e4 100644
  
    task :libuv  # do nothing
  end
+-- 
+2.31.1
+
