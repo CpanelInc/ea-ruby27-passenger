@@ -1,4 +1,4 @@
-From 76fbfc994728997867bca85756de4d8d44220b42 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Julian Brown <julian.brown@cpanel.net>
 Date: Wed, 2 Jun 2021 10:01:35 -0500
 Subject: [PATCH 1/7] Patch build files to use SCL libuv paths
@@ -28,6 +28,3 @@ index dbdd2f7..60cbff1 100644
  
    task :libuv  # do nothing
  end
--- 
-2.31.1
-

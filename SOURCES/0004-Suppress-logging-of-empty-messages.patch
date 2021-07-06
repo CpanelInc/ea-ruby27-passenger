@@ -1,4 +1,4 @@
-From e59ee3bbbc816f6c64e8b8a89d206cc5d669df8e Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Julian Brown <julian.brown@cpanel.net>
 Date: Wed, 2 Jun 2021 10:09:04 -0500
 Subject: [PATCH 4/7] Suppress logging of empty messages
@@ -21,6 +21,3 @@ index 710a8d4..a2adff7 100644
  	if (OXT_LIKELY(context != NULL)) {
  		const ConfigRealization *configRealization = context->getConfigRealization();
  		if (configRealization->level < configRealization->appOutputLogLevel) {
--- 
-2.31.1
-

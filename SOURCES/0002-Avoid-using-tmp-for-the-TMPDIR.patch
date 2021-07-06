@@ -1,4 +1,4 @@
-From 2d3a4c46d82c83fbec80eb08fc00df15c0aa027d Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Julian Brown <julian.brown@cpanel.net>
 Date: Wed, 2 Jun 2021 10:06:34 -0500
 Subject: [PATCH 2/7] Avoid using /tmp for the TMPDIR
@@ -36,6 +36,3 @@ index f1432f2..82ed066 100644
      end
  
      def self.process_is_alive?(pid)
--- 
-2.31.1
-
