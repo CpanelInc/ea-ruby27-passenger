@@ -9,15 +9,15 @@ to the default list
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb b/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
-index 0a846b7..c4b8701 100644
+index f3849b0..fd03d9b 100644
 --- a/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
 +++ b/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
-@@ -105,7 +105,7 @@ def default_paths
-         #
+@@ -106,7 +106,7 @@ def default_paths
          # systemd's PrivateTmp feature works like an inverted OSX, apache gets its own
-         # TMPDIR and users use /tmp
--        [string_env("TMPDIR"), "/tmp", "/var/run/passenger-instreg",*Dir['/tmp/systemd-private-*-{httpd,nginx}.service-*/tmp']].compact
-+        [string_env("TMPDIR"), "/tmp", "/var/run/passenger-instreg", "/opt/cpanel/ea-ruby27/root/usr/var/run/passenger-instreg", *Dir['/tmp/systemd-private-*-{httpd,nginx}.service-*/tmp']].compact
+         # TMPDIR and users use /tmp, however the path is often too long because socket paths can
+         # only be up to 108 characters long.
+-        [string_env("TMPDIR"), "/tmp", "/var/run/passenger-instreg",*Dir['/tmp/systemd-private-*-{httpd,nginx,apache2}.service-*/tmp']].compact
++        [string_env("TMPDIR"), "/tmp", "/var/run/passenger-instreg", "/opt/cpanel/ea-ruby27/root/usr/var/run/passenger-instreg", *Dir['/tmp/systemd-private-*-{httpd,nginx,apache2}.service-*/tmp']].compact
        end
  
        def string_env(name)
