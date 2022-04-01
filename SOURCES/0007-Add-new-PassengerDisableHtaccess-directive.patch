@@ -80,10 +80,10 @@ index b94a0d0..e0333c3 100644
    when :global
      # We only warn here instead of returning an error because this issue
 diff --git a/src/apache2_module/Hooks.cpp b/src/apache2_module/Hooks.cpp
-index 7884f5a..101f479 100644
+index e411322..27a8a6f 100644
 --- a/src/apache2_module/Hooks.cpp
 +++ b/src/apache2_module/Hooks.cpp
-@@ -1354,6 +1354,7 @@ public:
+@@ -1355,6 +1355,7 @@ public:
  		config["response_buffer_high_watermark"] = serverConfig.responseBufferHighWatermark;
  		config["stat_throttle_rate"] = serverConfig.statThrottleRate;
  		config["turbocaching"] = serverConfig.turbocaching;
@@ -92,7 +92,7 @@ index 7884f5a..101f479 100644
  		config["admin_panel_url"] = nonEmptyString(serverConfig.adminPanelUrl);
  		config["admin_panel_auth_type"] = nonEmptyString(serverConfig.adminPanelAuthType);
 diff --git a/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb b/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb
-index 933d12d..8e77c24 100644
+index ea51c20..5a9677c 100644
 --- a/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb
 +++ b/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb
 @@ -277,6 +277,14 @@
