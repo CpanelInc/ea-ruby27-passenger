@@ -20,7 +20,7 @@
 %define ruby_vendorlibdir   %(scl enable ea-ruby27 "ruby -rrbconfig -e 'puts RbConfig::CONFIG[%q|vendorlibdir|]'")
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 1
+%define release_prefix 2
 
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
 %global _httpd_confdir     %{_root_sysconfdir}/apache2/conf.d
@@ -424,7 +424,7 @@ PERL=/usr/local/cpanel/3rdparty/bin/perl
 UPDATE_USERDATA='my ($y, $r)=@ARGV;my $u="";my $apps=eval {Cpanel::JSON::LoadFile($y)}; if ($@) { warn $@; exit 0 } for my $app (keys %{$apps}) { if(!$apps->{$app}{ruby}) { $apps->{$app}{ruby} = $r;if(!$u) { $u=$y;$u=~ s{/[^/]+$}{};$u=~s{/var/cpanel/userdata/}{}; } } } Cpanel::JSON::DumpFile($y, $apps);print $u'
 UPDATE_INCLUDES='my $ch="";my $obj=Cpanel::Config::userdata::PassengerApps->new({user=>$ARGV[0]});my $apps=$obj->list_applications();for my $name (keys %{$apps}) {my $data=$apps->{$name};if ($data->{enabled}) {$obj->generate_apache_conf($name);$ch++;}}print $ch;'
 
-for appconf in $(ls /var/cpanel/userdata/*/applications.json); do
+for appconf in $(ls /var/cpanel/userdata/*/applications.json 2>/dev/null); do
     REGEN_USER=$($PERL -MCpanel::JSON -e "$UPDATE_USERDATA" $appconf /opt/cpanel/ea-ruby24/root/usr/libexec/passenger-ruby24)
 
     if [ ! -z "$REGEN_USER" ]; then
@@ -484,6 +484,9 @@ fi
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Tue Apr 19 2022 Travis Holloway <t.holloway@cpanel.net> - 6.0.13-2
+- EA-10531: Suppress no such file or directory warning during install
+
 * Fri Apr 01 2022 Cory McIntire <cory@cpanel.net> - 6.0.13-1
 - EA-10603: Update ea-ruby27-passenger from v6.0.12 to v6.0.13
 
