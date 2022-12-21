@@ -32,7 +32,7 @@
 
 Summary: Phusion Passenger application server
 Name: %{?scl:%scl_prefix}rubygem-passenger
-Version: 6.0.15
+Version: 6.0.16
 Release: %{release_prefix}%{?dist}.cpanel
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
@@ -484,6 +484,9 @@ fi
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Wed Dec 21 2022 Cory McIntire <cory@cpanel.net> - 6.0.16-1
+- EA-11117: Update ea-ruby27-passenger from v6.0.15 to v6.0.16
+
 * Wed Sep 21 2022 Cory McIntire <cory@cpanel.net> - 6.0.15-1
 - EA-10946: Update ea-ruby27-passenger from v6.0.14 to v6.0.15
 
