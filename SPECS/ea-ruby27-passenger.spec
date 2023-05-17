@@ -1,3 +1,6 @@
+%define debug_package %{nil}
+%define _enable_debug_packages %{nil}
+
 # Defining the package namespace
 %global ns_name ea
 %global ns_dir /opt/cpanel
@@ -20,7 +23,7 @@
 %define ruby_vendorlibdir   %(scl enable ea-ruby27 "ruby -rrbconfig -e 'puts RbConfig::CONFIG[%q|vendorlibdir|]'")
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 2
+%define release_prefix 3
 
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
 %global _httpd_confdir     %{_root_sysconfdir}/apache2/conf.d
@@ -484,6 +487,9 @@ fi
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Wed May 17 2023 Julian Brown <julian.brown@cpanel.net> - 6.0.17-3
+- ZC-10950: Fix build problems
+
 * Tue May 09 2023 Brian Mendoza <brian.mendoza@cpanel.net> - 6.0.17-2
 - ZC-10936: Clean up Makefile and remove debug-package-nil
 
