@@ -1,3 +1,6 @@
+%define debug_package %{nil}
+%define _enable_debug_packages %{nil}
+
 # Defining the package namespace
 %global ns_name ea
 %global ns_dir /opt/cpanel
@@ -32,7 +35,7 @@
 
 Summary: Phusion Passenger application server
 Name: %{?scl:%scl_prefix}rubygem-passenger
-Version: 6.0.17
+Version: 6.0.18
 Release: %{release_prefix}%{?dist}.cpanel
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
@@ -484,6 +487,15 @@ fi
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Fri Jun 16 2023 Cory McIntire <cory@cpanel.net> - 6.0.18-1
+- EA-11500: Update ea-ruby27-passenger from v6.0.17 to v6.0.18
+
+* Wed May 17 2023 Julian Brown <julian.brown@cpanel.net> - 6.0.17-3
+- ZC-10950: Fix build problems
+
+* Tue May 09 2023 Brian Mendoza <brian.mendoza@cpanel.net> - 6.0.17-2
+- ZC-10936: Clean up Makefile and remove debug-package-nil
+
 * Sun Jan 29 2023 Cory McIntire <cory@cpanel.net> - 6.0.17-1
 - EA-11188: Update ea-ruby27-passenger from v6.0.16 to v6.0.17
 
