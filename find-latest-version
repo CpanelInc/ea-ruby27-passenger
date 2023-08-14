@@ -27,7 +27,7 @@ sub _get_required {
     }
 
     # get $version, $url, $name from $res
-    my $version = Cpanel::JSON::Load( $res->{content} )->[0]{tag_name};
+    my $version = ea4_tool::util::json2ref( $res->{content} )->[0]{tag_name};
     $version =~ s/release-//;
     die "Could not determine version from github\n" if !$version;
 
