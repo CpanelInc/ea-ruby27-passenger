@@ -80,10 +80,10 @@ index b94a0d0..e0333c3 100644
    when :global
      # We only warn here instead of returning an error because this issue
 diff --git a/src/apache2_module/Hooks.cpp b/src/apache2_module/Hooks.cpp
-index e411322..27a8a6f 100644
+index 7f986a4..3af1b2f 100644
 --- a/src/apache2_module/Hooks.cpp
 +++ b/src/apache2_module/Hooks.cpp
-@@ -1355,6 +1355,7 @@ public:
+@@ -1380,6 +1380,7 @@ public:
  		config["response_buffer_high_watermark"] = serverConfig.responseBufferHighWatermark;
  		config["stat_throttle_rate"] = serverConfig.statThrottleRate;
  		config["turbocaching"] = serverConfig.turbocaching;
