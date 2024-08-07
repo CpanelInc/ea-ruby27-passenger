@@ -92,7 +92,7 @@ index 7f986a4..3af1b2f 100644
  		config["admin_panel_url"] = nonEmptyString(serverConfig.adminPanelUrl);
  		config["admin_panel_auth_type"] = nonEmptyString(serverConfig.adminPanelAuthType);
 diff --git a/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb b/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb
-index ea51c20..5a9677c 100644
+index 8e69297..eb6474e 100644
 --- a/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb
 +++ b/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb
 @@ -277,6 +277,14 @@
