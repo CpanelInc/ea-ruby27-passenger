@@ -6,7 +6,7 @@
 %global ns_dir /opt/cpanel
 %global pkg ruby27
 %global gem_name passenger
-%global bundled_boost_version 1.60.0
+%global bundled_boost_version 1.87.0
 
 # Force Software Collections on
 %global _scl_prefix %{ns_dir}
@@ -35,7 +35,7 @@
 
 Summary: Phusion Passenger application server
 Name: %{?scl:%scl_prefix}rubygem-passenger
-Version: 6.0.23
+Version: 6.0.27
 Release: %{release_prefix}%{?dist}.cpanel
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
@@ -265,6 +265,9 @@ mkdir -p %{buildroot}/opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 tar xzf %{SOURCE0} -C %{buildroot}/opt/cpanel/ea-ruby27/src/
 tar xzf %{SOURCE3} -C %{buildroot}/opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
+# Remove test directories that contain Python 3 syntax incompatible with Python 2 byte-compilation
+rm -rf %{buildroot}/opt/cpanel/ea-ruby27/src/passenger-release-%{version}/test/
+
 %{?scl:scl enable ea-ruby27 - << \EOF}
 export USE_VENDORED_LIBEV=true
 export USE_VENDORED_LIBUV=false
@@ -487,6 +490,9 @@ fi
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Mon Oct 06 2025 Brian Mendoza <brian.mendoza@cpanel.net> - 6.0.27-1
+- EA-12915: Update ea-ruby27-passenger from v6.0.23 to v6.0.27
+
 * Thu Aug 01 2024 Cory McIntire <cory@cpanel.net> - 6.0.23-1
 - EA-12309: Update ea-ruby27-passenger from v6.0.22 to v6.0.23
 
