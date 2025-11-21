@@ -8,7 +8,7 @@ Subject: [PATCH 4/7] Suppress logging of empty messages
  1 file changed, 3 insertions(+)
 
 diff --git a/src/cxx_supportlib/LoggingKit/Implementation.cpp b/src/cxx_supportlib/LoggingKit/Implementation.cpp
-index 48629a5..386ae2d 100644
+index 3c22b58..cb75606 100644
 --- a/src/cxx_supportlib/LoggingKit/Implementation.cpp
 +++ b/src/cxx_supportlib/LoggingKit/Implementation.cpp
 @@ -441,6 +441,9 @@ logAppOutput(const HashedStaticString &groupName, pid_t pid, const StaticString

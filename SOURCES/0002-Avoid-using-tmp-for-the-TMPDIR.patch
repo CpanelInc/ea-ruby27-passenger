@@ -11,7 +11,7 @@ SCL package.
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/cxx_supportlib/Utils.cpp b/src/cxx_supportlib/Utils.cpp
-index c66fecf..fa8eeef 100644
+index 7dfabb2..a5f510b 100644
 --- a/src/cxx_supportlib/Utils.cpp
 +++ b/src/cxx_supportlib/Utils.cpp
 @@ -265,7 +265,7 @@ const char *
@@ -24,7 +24,7 @@ index c66fecf..fa8eeef 100644
  	return temp_dir;
  }
 diff --git a/src/ruby_supportlib/phusion_passenger/admin_tools.rb b/src/ruby_supportlib/phusion_passenger/admin_tools.rb
-index f1432f2..82ed066 100644
+index 58f8aec..03002e9 100644
 --- a/src/ruby_supportlib/phusion_passenger/admin_tools.rb
 +++ b/src/ruby_supportlib/phusion_passenger/admin_tools.rb
 @@ -31,7 +31,7 @@ def self.tmpdir

@@ -9,7 +9,7 @@ to the default list
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb b/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
-index f3849b0..fd03d9b 100644
+index 88a7fcf..d8cdb4c 100644
 --- a/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
 +++ b/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
 @@ -106,7 +106,7 @@ def default_paths

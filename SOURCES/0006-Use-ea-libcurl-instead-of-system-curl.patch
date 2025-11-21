@@ -8,7 +8,7 @@ Subject: [PATCH 6/7] Use ea-libcurl instead of system curl
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/src/ruby_supportlib/phusion_passenger/platform_info/curl.rb b/src/ruby_supportlib/phusion_passenger/platform_info/curl.rb
-index 8961998..e6bef8a 100644
+index f0f2ca1..de01a0b 100644
 --- a/src/ruby_supportlib/phusion_passenger/platform_info/curl.rb
 +++ b/src/ruby_supportlib/phusion_passenger/platform_info/curl.rb
 @@ -28,11 +28,11 @@ module PhusionPassenger

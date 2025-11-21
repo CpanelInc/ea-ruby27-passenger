@@ -10,7 +10,7 @@ rh-passenger40 SCL package.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/ruby_supportlib/phusion_passenger/native_support.rb b/src/ruby_supportlib/phusion_passenger/native_support.rb
-index 0a327e3..444073e 100644
+index 4359fb9..712b9d0 100644
 --- a/src/ruby_supportlib/phusion_passenger/native_support.rb
 +++ b/src/ruby_supportlib/phusion_passenger/native_support.rb
 @@ -110,7 +110,7 @@ def load_from_buildout_dir
