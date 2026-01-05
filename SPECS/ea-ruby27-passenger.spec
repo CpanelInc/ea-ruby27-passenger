@@ -23,7 +23,7 @@
 %define ruby_vendorlibdir   %(scl enable ea-ruby27 "ruby -rrbconfig -e 'puts RbConfig::CONFIG[%q|vendorlibdir|]'")
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 2
+%define release_prefix 1
 
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
 %global _httpd_confdir     %{_root_sysconfdir}/apache2/conf.d
@@ -35,7 +35,7 @@
 
 Summary: Phusion Passenger application server
 Name: %{?scl:%scl_prefix}rubygem-passenger
-Version: 6.1.0
+Version: 6.1.1
 Release: %{release_prefix}%{?dist}.cpanel
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
@@ -490,6 +490,9 @@ fi
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Tue Dec 23 2025 Cory McIntire <cory.mcintire@webpros.com> - 6.1.1-1
+- EA-13307: Update ea-ruby27-passenger from v6.1.0 to v6.1.1
+
 * Fri Nov 21 2025 Cory McIntire <cory.mcintire@webpros.com> - 6.1.0-2
 - EA-13227: Disable CentOS 7 builds (Passenger 6.1.0 requires C++11 features not in GCC 4.8)
 
