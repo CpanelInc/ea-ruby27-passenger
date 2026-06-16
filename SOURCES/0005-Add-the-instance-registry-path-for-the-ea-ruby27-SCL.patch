@@ -16,8 +16,8 @@ index 88a7fcf..d8cdb4c 100644
          # systemd's PrivateTmp feature works like an inverted OSX, apache gets its own
          # TMPDIR and users use /tmp, however the path is often too long because socket paths can
          # only be up to 108 characters long.
--        [string_env("TMPDIR"), "/tmp", "/var/run/passenger-instreg",*Dir['/tmp/systemd-private-*-{httpd,nginx,apache2}.service-*/tmp']].compact
-+        [string_env("TMPDIR"), "/tmp", "/var/run/passenger-instreg", "/opt/cpanel/ea-ruby27/root/usr/var/run/passenger-instreg", *Dir['/tmp/systemd-private-*-{httpd,nginx,apache2}.service-*/tmp']].compact
+-        [ string_env("TMPDIR"), "/tmp", "/var/run/passenger-instreg", *Dir['/tmp/systemd-private-*-{httpd,nginx,apache2}.service-*/tmp'] ].compact
++        [ string_env("TMPDIR"), "/tmp", "/var/run/passenger-instreg", "/opt/cpanel/ea-ruby27/root/usr/var/run/passenger-instreg", *Dir['/tmp/systemd-private-*-{httpd,nginx,apache2}.service-*/tmp'] ].compact
        end
  
        def string_env(name)
