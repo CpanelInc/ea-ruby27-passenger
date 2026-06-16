@@ -31,8 +31,8 @@ index 58f8aec..03002e9 100644
            return ENV[name]
          end
        end
--      return Dir['/tmp/systemd-private-*-{httpd,nginx}.service-*/tmp'].first || "/tmp"
-+      return Dir['/tmp/systemd-private-*-{httpd,nginx}.service-*/tmp'].first || "/var/run/ea-ruby27-passenger"
+-      Dir['/tmp/systemd-private-*-{httpd,nginx}.service-*/tmp'].first || "/tmp"
++      Dir['/tmp/systemd-private-*-{httpd,nginx}.service-*/tmp'].first || "/var/run/ea-ruby27-passenger"
      end
  
      def self.process_is_alive?(pid)

@@ -96,17 +96,17 @@ index 71dec9a..d69c33a 100644
 --- a/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb
 +++ b/src/ruby_supportlib/phusion_passenger/apache2/config_options.rb
 @@ -277,6 +277,14 @@
-     :default   => true,
-     :desc      => "Whether to enable turbocaching in #{PROGRAM_NAME}."
+     default: true,
+     desc: "Whether to enable turbocaching in #{PROGRAM_NAME}.",
    },
 +  {
-+    :name      => 'PassengerDisableHtaccess',
-+    :type      => :flag,
-+    :context   => :global,
-+    :default   => false,
-+    :field     => 'disableHtaccess',
-+    :desc      => 'Disallow Phusion Passenger directives in .htaccess files.',
++    name: 'PassengerDisableHtaccess',
++    type: :flag,
++    context: :global,
++    default: false,
++    field: 'disableHtaccess',
++    desc: 'Disallow Phusion Passenger directives in .htaccess files.',
 +  },
    {
-     :name      => 'PassengerOldRouting',
-     :type      => :flag,
+     name: 'PassengerOldRouting',
+     type: :flag,
