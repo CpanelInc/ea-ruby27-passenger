@@ -8,10 +8,10 @@ Subject: [PATCH 6/7] Use ea-libcurl instead of system curl
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/src/ruby_supportlib/phusion_passenger/platform_info/curl.rb b/src/ruby_supportlib/phusion_passenger/platform_info/curl.rb
-index f0f2ca1..de01a0b 100644
+index 7b599ef..a37c0fc 100644
 --- a/src/ruby_supportlib/phusion_passenger/platform_info/curl.rb
 +++ b/src/ruby_supportlib/phusion_passenger/platform_info/curl.rb
-@@ -28,11 +28,11 @@
+@@ -28,11 +28,11 @@ module PhusionPassenger
  
    module PlatformInfo
      def self.curl_flags
@@ -25,7 +25,7 @@ index f0f2ca1..de01a0b 100644
          if version >= '070c01'
            # Curl >= 7.12.1 supports curl_easy_reset()
            result << " -DHAS_CURL_EASY_RESET"
-@@ -43,7 +43,7 @@
+@@ -43,7 +43,7 @@ def self.curl_flags
      memoize :curl_flags
  
      def self.curl_libs
@@ -34,7 +34,7 @@ index f0f2ca1..de01a0b 100644
        if os_name_simple == "macosx"
          result << ' -framework Foundation -framework SystemConfiguration'
        end
-@@ -56,7 +56,7 @@
+@@ -56,7 +56,7 @@ def self.curl_libs
      memoize :curl_libs
  
      def self.curl_supports_ssl?

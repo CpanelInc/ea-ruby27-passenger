@@ -14,10 +14,10 @@ therefore this patch only updates the libuv paths.
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/build/common_library.rb b/build/common_library.rb
-index af677ff..fb3939a 100644
+index ff2babc..2514872 100644
 --- a/build/common_library.rb
 +++ b/build/common_library.rb
-@@ -237,8 +237,8 @@ def define_libboost_oxt_task(namespace, output_dir, extra_compiler_flags = nil)
+@@ -238,8 +238,8 @@ def define_libboost_oxt_task(namespace, output_dir, extra_compiler_flags = nil)
  else
    LIBUV_TARGET = nil
  

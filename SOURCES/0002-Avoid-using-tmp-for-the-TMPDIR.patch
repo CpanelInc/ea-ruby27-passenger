@@ -24,7 +24,7 @@ index 7dfabb2..a5f510b 100644
  	return temp_dir;
  }
 diff --git a/src/ruby_supportlib/phusion_passenger/admin_tools.rb b/src/ruby_supportlib/phusion_passenger/admin_tools.rb
-index 58f8aec..03002e9 100644
+index 3b71d95..bb3f14c 100644
 --- a/src/ruby_supportlib/phusion_passenger/admin_tools.rb
 +++ b/src/ruby_supportlib/phusion_passenger/admin_tools.rb
 @@ -31,7 +31,7 @@ def self.tmpdir

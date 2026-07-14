@@ -9,10 +9,10 @@ to the default list
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb b/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
-index 88a7fcf..d8cdb4c 100644
+index 5229a6a..12c065f 100644
 --- a/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
 +++ b/src/ruby_supportlib/phusion_passenger/admin_tools/instance_registry.rb
-@@ -106,7 +106,7 @@ def default_paths
+@@ -107,7 +107,7 @@ def default_paths
          # systemd's PrivateTmp feature works like an inverted OSX, apache gets its own
          # TMPDIR and users use /tmp, however the path is often too long because socket paths can
          # only be up to 108 characters long.
