@@ -23,7 +23,7 @@
 %define ruby_vendorlibdir   %(scl enable ea-ruby27 "ruby -rrbconfig -e 'puts RbConfig::CONFIG[%q|vendorlibdir|]'")
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 1
+%define release_prefix 2
 
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
 %global _httpd_confdir     %{_root_sysconfdir}/apache2/conf.d
@@ -75,6 +75,8 @@ Patch5:         0006-Use-ea-libcurl-instead-of-system-curl.patch
 # Add a new directive to Passenger that will allow us to disallow
 ## Passenger directives in .htaccess files
 Patch6:         0007-Add-new-PassengerDisableHtaccess-directive.patch
+# Security hardening of the agent API server authorization boundary
+Patch7:         0008-Fail-closed-on-empty-API-account-database.patch
 
 BuildRequires: tree
 
@@ -198,6 +200,10 @@ Phusion Passenger application server for %{scl_prefix}.
 %patch5 -p1 -b .useeacurl
 %endif
 %patch6 -p1 -b .disablehtaccess
+# Deliberately no -b backup suffix. This is a security patch, and a backup suffix
+# leaves the pre-patch file in the source tree, which this package ships under
+# /opt/cpanel/ea-ruby27/src/ - handing every host a readable copy of the unfixed code.
+%patch7 -p1
 cp %{SOURCE15} .
 
 tar -xf %{SOURCE3}
@@ -490,6 +496,9 @@ fi
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Thu Aug 13 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.1.8-2
+- SEC-75753: Security hardening.
+
 * Wed Jul 22 2026 EA4 Update Bot <cory.mcintire@webpros.com> - 6.1.8-1
 - EA-13510: Update ea-ruby27-passenger from v6.1.7 to v6.1.8
 
