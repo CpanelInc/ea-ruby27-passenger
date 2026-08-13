@@ -1,0 +1,154 @@
+From 746fd50a23a993be725c836177e1cb0b964757b3 Mon Sep 17 00:00:00 2001
+From: Cory McIntire <cory.mcintire@webpros.com>
+Date: Thu, 13 Aug 2026 07:53:37 -0500
+Subject: [PATCH] Fix watchdog API account database being silently emptied, and
+ fail closed
+
+Two related defects in the agent API authorization path. The first is the cause,
+the second is the guard that should have contained it.
+
+Cause - Watchdog/WatchdogMain.cpp
+
+The watchdog seeds two API accounts, ro_admin and admin, then hands them to the
+ApiServer. It assigned them to the inner schema key "authorizations", but the
+document it assigns into is inspectEffectiveValues(), which already carries the
+outer key "watchdog_api_server_authorizations" defaulted to an empty array. The
+ApiServer schema translator maps that outer name onto the inner one, and the
+ConfigKit translator assigns while iterating a jsoncpp object, which iterates in
+sorted key order - so the outer key was applied last and overwrote the seeded
+entries with the empty default.
+
+The effect was an unconditionally empty API account database on every watchdog,
+on every install, which is why the seeded accounts never functioned on this
+socket. Fixed by assigning the outer key, which the translator then maps to the
+inner one with no competing value. Operator-supplied entries are already merged
+into the same array beforehand, so nothing is lost. The Core API server was never
+affected: its schema has no top-level "authorizations" key and CoreMain does not
+assign the inner name.
+
+Guard - Shared/ApiServerUtils.h and Watchdog/ApiServer.h
+
+- An empty API account database no longer confers administrator rights. It grants
+  no privileges and logs at DEBUG only. DEBUG is deliberate: the branch is
+  evaluated on every request before authentication and the API socket is
+  world-writable, so emitting at the default log level would let any local client
+  flood a root-owned log. This helper is shared by the Watchdog and Core API
+  servers. Root and the agent own euid retain access through the existing
+  authorizeByUid() path, which is unchanged.
+
+- The empty-database check is no longer chained ahead of the basic-auth attempt,
+  so an empty database does not suppress the API-key path.
+
+- Accounts whose password is empty are no longer accepted by the basic-auth
+  comparison. Authorization descriptors accept an empty "password" with no
+  emptiness check, and constantTimeCompare returns true for two zero-length
+  strings, so a misconfigured or emptied password file would otherwise grant a
+  super-admin key to any caller.
+
+- Return after responding 401 in the GET /config.json branch. This is required
+  rather than cosmetic: apiServerRespondWith401 returns the request to the
+  freelist and takes its Request pointer by value, so the caller keeps a dangling
+  pointer and the existing fall-through would write a 200 response over a
+  recycled request. That branch was unreachable while the database was always
+  empty and always authorizing, and becomes reachable with this change.
+
+- Also return after the 401 in the PUT /config.json branch. Body data is already
+  discarded once a request has ended, so this is defensive clarity and parity
+  with Core/ApiServer.h rather than a fix for a reachable defect.
+---
+ src/agent/Shared/ApiServerUtils.h   | 25 ++++++++++++++++---------
+ src/agent/Watchdog/ApiServer.h      |  2 ++
+ src/agent/Watchdog/WatchdogMain.cpp | 17 ++++++++++++++++-
+ 3 files changed, 34 insertions(+), 10 deletions(-)
+
+diff --git a/src/agent/Shared/ApiServerUtils.h b/src/agent/Shared/ApiServerUtils.h
+index b108663..3e39c14 100644
+--- a/src/agent/Shared/ApiServerUtils.h
++++ b/src/agent/Shared/ApiServerUtils.h
+@@ -167,14 +167,19 @@ authorize(ApiServer *server, Client *client, Request *req) {
+ 	}
+ 
+ 	if (server->getApiAccountDatabase().empty()) {
+-		SKC_INFO_FROM_STATIC(server, client,
+-			"Authenticated as administrator because API account database is empty");
+-		auth.apiKey = ApplicationPool2::ApiKey::makeSuper();
+-		auth.canReadPool = true;
+-		auth.canModifyPool = true;
+-		auth.canInspectState = true;
+-		auth.canAdminister = true;
+-	} else if (parseBasicAuthHeader(req, username, password)) {
++		/*
++		 * Deliberately DEBUG, not WARN or INFO. This branch is evaluated on every
++		 * request before authentication, and the API socket is world-writable, so
++		 * anything emitted at the default log level lets any local client flood a
++		 * root-owned log file. The condition is a persistent configuration state
++		 * rather than a per-request event, so it belongs in a one-time startup
++		 * diagnostic, not here.
++		 */
++		SKC_DEBUG_FROM_STATIC(server, client,
++			"API account database is empty; refusing unauthenticated access");
++	}
++
++	if (parseBasicAuthHeader(req, username, password)) {
+ 		SKC_DEBUG_FROM_STATIC(server, client,
+ 			"HTTP basic authentication supplied: " << username);
+ 		if (username == "api") {
+@@ -189,7 +194,9 @@ authorize(ApiServer *server, Client *client, Request *req) {
+ 		} else {
+ 			const typename ApiServer::ApiAccount *account =
+ 				server->getApiAccountDatabase().lookup(username);
+-			if (account != NULL && constantTimeCompare(password, account->password)) {
++			if (account != NULL && !account->password.empty()
++			 && constantTimeCompare(password, account->password))
++			{
+ 				SKC_INFO_FROM_STATIC(server, client,
+ 					"Authenticated with administrator account: " << username);
+ 				auth.apiKey = ApplicationPool2::ApiKey::makeSuper();
+diff --git a/src/agent/Watchdog/ApiServer.h b/src/agent/Watchdog/ApiServer.h
+index 8d3c626..db59468 100644
+--- a/src/agent/Watchdog/ApiServer.h
++++ b/src/agent/Watchdog/ApiServer.h
+@@ -160,6 +160,7 @@ private:
+ 		if (req->method == HTTP_GET) {
+ 			if (!authorizeStateInspectionOperation(this, client, req)) {
+ 				apiServerRespondWith401(this, client, req);
++				return;
+ 			}
+ 
+ 			HeaderTable headers;
+@@ -172,6 +173,7 @@ private:
+ 		} else if (req->method == HTTP_PUT) {
+ 			if (!authorizeAdminOperation(this, client, req)) {
+ 				apiServerRespondWith401(this, client, req);
++				return;
+ 			} else if (!req->hasBody()) {
+ 				endAsBadRequest(&client, &req, "Body required");
+ 			}
+diff --git a/src/agent/Watchdog/WatchdogMain.cpp b/src/agent/Watchdog/WatchdogMain.cpp
+index c86ccc3..d9ae846 100644
+--- a/src/agent/Watchdog/WatchdogMain.cpp
++++ b/src/agent/Watchdog/WatchdogMain.cpp
+@@ -1244,7 +1244,22 @@ initializeApiServer(const WorkingObjectsPtr &wo) {
+ 	UPDATE_TRACE_POINT();
+ 	Json::Value apiServerConfig = watchdogConfig->inspectEffectiveValues();
+ 	apiServerConfig["fd_passing_password"] = wo->fdPassingPassword;
+-	apiServerConfig["authorizations"] = wo->watchdogApiServerAuthorizations;
++	/*
++	 * Assign the OUTER key, not the inner "authorizations" key.
++	 *
++	 * inspectEffectiveValues() already emits "watchdog_api_server_authorizations",
++	 * defaulting to an empty array, and the ApiServer schema translator maps that
++	 * outer name onto the inner "authorizations". Writing the inner name here left
++	 * both keys present in the same document; ConfigKit's translator assigns while
++	 * iterating, jsoncpp iterates keys in sorted order, so the outer key was applied
++	 * last and silently overwrote these entries with the empty default. The result
++	 * was an always-empty API account database, which is why the seeded ro_admin and
++	 * admin accounts never worked on this socket.
++	 *
++	 * The Core API server does not have this problem: its schema has no top-level
++	 * "authorizations" key and CoreMain does not assign the inner name.
++	 */
++	apiServerConfig["watchdog_api_server_authorizations"] = wo->watchdogApiServerAuthorizations;
+ 	wo->apiServer = new ApiServer::ApiServer(
+ 		wo->serverKitContext,
+ 		watchdogSchema->apiServer.schema,
