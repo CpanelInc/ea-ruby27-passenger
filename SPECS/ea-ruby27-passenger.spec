@@ -25,6 +25,25 @@
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
 %define release_prefix 2
 
+# TEMPORARY el7 CARVE-OUT - remove this whole conditional when el7 support is dropped.
+#
+# EA-13227 disabled CentOS 7 builds because Passenger 6.1.x requires C++11 features
+# that CentOS 7's GCC 4.8 does not provide. SEC-75753 then required a security update
+# for el7, where the last published build is 6.0.27. So el7 builds 6.0.27 from its own
+# era-matched patch series (the el7-* SOURCES), and every other distro builds 6.1.8
+# from the current series. Both lanes take the same security patch.
+#
+# release_prefix 2 is deliberately shared: it makes 6.0.27-2 supersede the published
+# el7 6.0.27-1, and 6.1.8-2 supersede 6.1.8-1, so yum offers an update on both lanes.
+#
+# If you bump the version below, you are only bumping the NON-el7 lane. el7 stays
+# pinned at 6.0.27 on purpose - it cannot compile anything newer.
+%if 0%{?rhel} == 7
+%define passenger_version 6.0.27
+%else
+%define passenger_version 6.1.8
+%endif
+
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
 %global _httpd_confdir     %{_root_sysconfdir}/apache2/conf.d
 %global _httpd_modconfdir  %{_root_sysconfdir}/apache2/conf.modules.d
@@ -35,7 +54,7 @@
 
 Summary: Phusion Passenger application server
 Name: %{?scl:%scl_prefix}rubygem-passenger
-Version: 6.1.8
+Version: %{passenger_version}
 Release: %{release_prefix}%{?dist}.cpanel
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
@@ -75,8 +94,20 @@ Patch5:         0006-Use-ea-libcurl-instead-of-system-curl.patch
 # Add a new directive to Passenger that will allow us to disallow
 ## Passenger directives in .htaccess files
 Patch6:         0007-Add-new-PassengerDisableHtaccess-directive.patch
-# Security hardening of the agent API server authorization boundary
+# Security hardening of the agent API server authorization boundary.
+# Applies cleanly to both 6.0.27 and 6.1.8, so both lanes share it.
 Patch7:         0008-Fail-closed-on-empty-API-account-database.patch
+
+# TEMPORARY el7 CARVE-OUT - the Patch0-Patch6 series above targets 6.1.8 and does not
+# apply to 6.0.27. These are the era-matched equivalents, applied only on el7.
+# Remove along with the version conditional when el7 support is dropped.
+Patch10:        el7-0001-Patch-build-files-to-use-SCL-libuv-paths.patch
+Patch11:        el7-0002-Avoid-using-tmp-for-the-TMPDIR.patch
+Patch12:        el7-0003-Fix-the-path-for-passenger_native_support.patch
+Patch13:        el7-0004-Suppress-logging-of-empty-messages.patch
+Patch14:        el7-0005-Add-the-instance-registry-path-for-the-ea-ruby27-SCL.patch
+Patch15:        el7-0006-Use-ea-libcurl-instead-of-system-curl.patch
+Patch16:        el7-0007-Add-new-PassengerDisableHtaccess-directive.patch
 
 BuildRequires: tree
 
@@ -191,15 +222,27 @@ Phusion Passenger application server for %{scl_prefix}.
 %prep
 %setup -q %{?scl:-n %{gem_name}-release-%{version}}
 
+%if 0%{?rhel} == 7
+# TEMPORARY el7 CARVE-OUT - era-matched series for Passenger 6.0.27. No -b suffixes:
+# this package ships its source tree, so backup files would place pre-patch copies on
+# customer disk. Patch15 is the ea-libcurl change, which was always el7-only.
+%patch10 -p1
+%patch11 -p1
+%patch12 -p1
+%patch13 -p1
+%patch14 -p1
+%patch15 -p1
+%patch16 -p1
+%else
 %patch0 -p1 -b .libuv
 %patch1 -p1 -b .tmpdir
 %patch2 -p1 -b .nativelibdir
 %patch3 -p1 -b .emptymsglog
 %patch4 -p1 -b .instanceregpath
-%if 0%{?rhel} < 8
-%patch5 -p1 -b .useeacurl
-%endif
+# Patch5 (ea-libcurl) was guarded by "rhel < 8", i.e. el7 only. el7 now takes the
+# el7 branch above, so it would be dead here.
 %patch6 -p1 -b .disablehtaccess
+%endif
 # Deliberately no -b backup suffix. This is a security patch, and a backup suffix
 # leaves the pre-patch file in the source tree, which this package ships under
 # /opt/cpanel/ea-ruby27/src/ - handing every host a readable copy of the unfixed code.
@@ -498,6 +541,7 @@ fi
 %changelog
 * Thu Aug 13 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.1.8-2
 - SEC-75753: Security hardening.
+- SEC-75753: Re-enable CentOS 7 builds, which build Passenger 6.0.27.
 
 * Wed Jul 22 2026 EA4 Update Bot <cory.mcintire@webpros.com> - 6.1.8-1
 - EA-13510: Update ea-ruby27-passenger from v6.1.7 to v6.1.8
