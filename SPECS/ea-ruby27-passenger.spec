@@ -33,8 +33,8 @@
 # era-matched patch series (the el7-* SOURCES), and every other distro builds 6.1.8
 # from the current series. Only el7 takes the 0008 security patch; 6.2.0 ships the fix.
 #
-# release_prefix 2 is deliberately shared: it makes 6.0.27-2 supersede the published
-# el7 6.0.27-1, and 6.1.8-2 supersede 6.1.8-1, so yum offers an update on both lanes.
+# el7 pins its own release_prefix below, so a version bump resetting the global one
+# to 1 cannot push el7 under its published 6.0.27-2.
 #
 # If you bump the version below, you are only bumping the NON-el7 lane. el7 stays
 # pinned at 6.0.27 on purpose - it cannot compile anything newer. The non-el7 define
@@ -43,6 +43,7 @@
 %define passenger_version 6.2.0
 %else
 %define passenger_version 6.0.27
+%define release_prefix 2
 %endif
 
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
