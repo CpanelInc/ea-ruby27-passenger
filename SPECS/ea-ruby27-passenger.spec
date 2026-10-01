@@ -23,7 +23,7 @@
 %define ruby_vendorlibdir   %(scl enable ea-ruby27 "ruby -rrbconfig -e 'puts RbConfig::CONFIG[%q|vendorlibdir|]'")
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 2
+%define release_prefix 1
 
 # TEMPORARY el7 CARVE-OUT - remove this whole conditional when el7 support is dropped.
 #
@@ -40,7 +40,7 @@
 # pinned at 6.0.27 on purpose - it cannot compile anything newer. The non-el7 define
 # must come first: et reads and rewrites the first passenger_version it finds.
 %if 0%{?rhel} != 7
-%define passenger_version 6.1.8
+%define passenger_version 6.2.0
 %else
 %define passenger_version 6.0.27
 %endif
@@ -540,6 +540,9 @@ fi
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Thu Oct 01 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.2.0-1
+- EA-13534: Update ea-ruby27-passenger from v6.1.8 to v6.2.0
+
 * Thu Aug 13 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.1.8-2
 - SEC-75753: Security hardening.
 - SEC-75753: Re-enable CentOS 7 builds, which build Passenger 6.0.27.
