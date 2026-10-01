@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Julian Brown <julian.brown@cpanel.net>
 Date: Wed, 2 Jun 2021 10:13:57 -0500
-Subject: [PATCH 7/7] Add new 'PassengerDisableHtaccess' directive
+Subject: [PATCH 6/6] Add new 'PassengerDisableHtaccess' directive
 
 The original patch for this had to be changed since the
 code it patched had been re-factored.
