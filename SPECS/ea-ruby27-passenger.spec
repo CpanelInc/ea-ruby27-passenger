@@ -23,7 +23,7 @@
 %define ruby_vendorlibdir   %(scl enable ea-ruby27 "ruby -rrbconfig -e 'puts RbConfig::CONFIG[%q|vendorlibdir|]'")
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 2
+%define release_prefix 1
 
 # TEMPORARY el7 CARVE-OUT - remove this whole conditional when el7 support is dropped.
 #
@@ -31,17 +31,19 @@
 # that CentOS 7's GCC 4.8 does not provide. SEC-75753 then required a security update
 # for el7, where the last published build is 6.0.27. So el7 builds 6.0.27 from its own
 # era-matched patch series (the el7-* SOURCES), and every other distro builds 6.1.8
-# from the current series. Both lanes take the same security patch.
+# from the current series. Only el7 takes the 0008 security patch; 6.2.0 ships the fix.
 #
-# release_prefix 2 is deliberately shared: it makes 6.0.27-2 supersede the published
-# el7 6.0.27-1, and 6.1.8-2 supersede 6.1.8-1, so yum offers an update on both lanes.
+# el7 pins its own release_prefix below, so a version bump resetting the global one
+# to 1 cannot push el7 under its published 6.0.27-2.
 #
 # If you bump the version below, you are only bumping the NON-el7 lane. el7 stays
-# pinned at 6.0.27 on purpose - it cannot compile anything newer.
-%if 0%{?rhel} == 7
-%define passenger_version 6.0.27
+# pinned at 6.0.27 on purpose - it cannot compile anything newer. The non-el7 define
+# must come first: et reads and rewrites the first passenger_version it finds.
+%if 0%{?rhel} != 7
+%define passenger_version 6.2.0
 %else
-%define passenger_version 6.1.8
+%define passenger_version 6.0.27
+%define release_prefix 2
 %endif
 
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
@@ -94,8 +96,8 @@ Patch5:         0006-Use-ea-libcurl-instead-of-system-curl.patch
 # Add a new directive to Passenger that will allow us to disallow
 ## Passenger directives in .htaccess files
 Patch6:         0007-Add-new-PassengerDisableHtaccess-directive.patch
-# Security hardening of the agent API server authorization boundary.
-# Applies cleanly to both 6.0.27 and 6.1.8, so both lanes share it.
+# Security hardening of the agent API server authorization boundary. el7 only:
+# Passenger 6.2.0 ships the same fix upstream.
 Patch7:         0008-Fail-closed-on-empty-API-account-database.patch
 
 # TEMPORARY el7 CARVE-OUT - the Patch0-Patch6 series above targets 6.1.8 and does not
@@ -233,6 +235,10 @@ Phusion Passenger application server for %{scl_prefix}.
 %patch14 -p1
 %patch15 -p1
 %patch16 -p1
+# Deliberately no -b backup suffix. This is a security patch, and a backup suffix
+# leaves the pre-patch file in the source tree, which this package ships under
+# /opt/cpanel/ea-ruby27/src/ - handing every host a readable copy of the unfixed code.
+%patch7 -p1
 %else
 %patch0 -p1 -b .libuv
 %patch1 -p1 -b .tmpdir
@@ -243,10 +249,6 @@ Phusion Passenger application server for %{scl_prefix}.
 # el7 branch above, so it would be dead here.
 %patch6 -p1 -b .disablehtaccess
 %endif
-# Deliberately no -b backup suffix. This is a security patch, and a backup suffix
-# leaves the pre-patch file in the source tree, which this package ships under
-# /opt/cpanel/ea-ruby27/src/ - handing every host a readable copy of the unfixed code.
-%patch7 -p1
 cp %{SOURCE15} .
 
 tar -xf %{SOURCE3}
@@ -539,6 +541,9 @@ fi
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Thu Oct 01 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.2.0-1
+- EA-13534: Update ea-ruby27-passenger from v6.1.8 to v6.2.0
+
 * Thu Aug 13 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.1.8-2
 - SEC-75753: Security hardening.
 - SEC-75753: Re-enable CentOS 7 builds, which build Passenger 6.0.27.
