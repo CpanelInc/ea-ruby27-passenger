@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Julian Brown <julian.brown@cpanel.net>
 Date: Wed, 2 Jun 2021 10:07:38 -0500
-Subject: [PATCH 3/7] Fix the path for passenger_native_support
+Subject: [PATCH 3/6] Fix the path for passenger_native_support
 
 Adopted from the rubygem-passenger-4.0.18_native_dir patch from the
 rh-passenger40 SCL package.
