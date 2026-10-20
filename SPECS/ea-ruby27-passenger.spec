@@ -23,7 +23,7 @@
 %define ruby_vendorlibdir   %(scl enable ea-ruby27 "ruby -rrbconfig -e 'puts RbConfig::CONFIG[%q|vendorlibdir|]'")
 
 # Doing release_prefix this way for Release allows for OBS-proof versioning, See EA-4590 for more details
-%define release_prefix 2
+%define release_prefix 1
 
 # TEMPORARY el7 CARVE-OUT - remove this whole conditional when el7 support is dropped.
 #
@@ -40,7 +40,7 @@
 # pinned at 6.0.27 on purpose - it cannot compile anything newer. The non-el7 define
 # must come first: et reads and rewrites the first passenger_version it finds.
 %if 0%{?rhel} != 7
-%define passenger_version 6.2.0
+%define passenger_version 6.2.1
 %else
 %define passenger_version 6.0.27
 %global release_prefix 2
@@ -73,7 +73,7 @@ URL: https://www.phusionpassenger.com
 Source: release-%{version}.tar.gz
 %else
 # Version floor is load-bearing: an older ea-passenger-src would silently build stale source.
-BuildRequires: ea-passenger-src >= 6.2.0-3
+BuildRequires: ea-passenger-src >= %{passenger_version}
 %endif
 Source1: passenger.logrotate
 Source2: rubygem-passenger.tmpfiles
@@ -569,6 +569,9 @@ fi
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Tue Oct 20 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.2.1-1
+- EA-13602: ea-passenger-src was updated from v6.2.0 to v6.2.1
+
 * Thu Oct 15 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.2.0-2
 - EA-13596: Build from ea-passenger-src instead of a separate Passenger source tarball
 
