@@ -30,20 +30,20 @@
 # EA-13227 disabled CentOS 7 builds because Passenger 6.1.x requires C++11 features
 # that CentOS 7's GCC 4.8 does not provide. SEC-75753 then required a security update
 # for el7, where the last published build is 6.0.27. So el7 builds 6.0.27 from its own
-# era-matched patch series (the el7-* SOURCES), and every other distro builds 6.1.8
-# from the current series. Only el7 takes the 0008 security patch; 6.2.0 ships the fix.
+# tarball and era-matched patch series (the el7-* SOURCES), and every other distro builds
+# from the ea-passenger-src tree. Only el7 takes the 0008 security patch; 6.2.0 ships the fix.
 #
-# el7 pins its own release_prefix below, so a version bump resetting the global one
-# to 1 cannot push el7 under its published 6.0.27-2.
+# el7 pins its own release_prefix below as a global, which et never rewrites, so a
+# version bump resetting the global one to 1 cannot push el7 under its published 6.0.27-2.
 #
 # If you bump the version below, you are only bumping the NON-el7 lane. el7 stays
 # pinned at 6.0.27 on purpose - it cannot compile anything newer. The non-el7 define
 # must come first: et reads and rewrites the first passenger_version it finds.
 %if 0%{?rhel} != 7
-%define passenger_version 6.2.0
+%define passenger_version 6.2.1
 %else
 %define passenger_version 6.0.27
-%define release_prefix 2
+%global release_prefix 2
 %endif
 
 %global _httpd_mmn         %(cat %{_root_includedir}/apache2/.mmn 2>/dev/null || echo missing-ea-apache24-devel)
@@ -67,8 +67,14 @@ Group: System Environment/Daemons
 License: Boost and BSD and BSD with advertising and MIT and zlib
 URL: https://www.phusionpassenger.com
 
-# http://s3.amazonaws.com/phusion-passenger/releases/passenger-%%{version}.tar.gz
+# Every distro except el7 builds from the tree ea-passenger-src installs, which carries the
+# shared EA4 patches and the vendored build submodules. el7 cannot compile that version.
+%if 0%{?rhel} == 7
 Source: release-%{version}.tar.gz
+%else
+# Version floor is load-bearing: an older ea-passenger-src would silently build stale source.
+BuildRequires: ea-passenger-src >= %{passenger_version}
+%endif
 Source1: passenger.logrotate
 Source2: rubygem-passenger.tmpfiles
 Source3: cxxcodebuilder.tar.gz
@@ -80,27 +86,20 @@ Source13: ea-ruby27
 Source14: passenger_apps.default
 Source15: update_ruby_shebang.pl
 
+# The TMPDIR, empty-message and PassengerDisableHtaccess patches come from ea-passenger-src.
 # Use upstream libuv instead of the bundled libuv
 Patch0:         0001-Patch-build-files-to-use-SCL-libuv-paths.patch
-# httpd on RHEL7 is using private /tmp. This break passenger status.
-# We workaround that by using "/var/run/ea-ruby27-passenger" instead of "/tmp".
-Patch1:         0002-Avoid-using-tmp-for-the-TMPDIR.patch
 # Load passenger_native_support.so from lib_dir
 Patch2:         0003-Fix-the-path-for-passenger_native_support.patch
-# Supress logging of empty messages
-Patch3:         0004-Suppress-logging-of-empty-messages.patch
 # Update the instance registry paths to include the SCL path
 Patch4:         0005-Add-the-instance-registry-path-for-the-ea-ruby27-SCL.patch
 # Build against ea-libcurl
 Patch5:         0006-Use-ea-libcurl-instead-of-system-curl.patch
-# Add a new directive to Passenger that will allow us to disallow
-## Passenger directives in .htaccess files
-Patch6:         0007-Add-new-PassengerDisableHtaccess-directive.patch
 # Security hardening of the agent API server authorization boundary. el7 only:
 # Passenger 6.2.0 ships the same fix upstream.
 Patch7:         0008-Fail-closed-on-empty-API-account-database.patch
 
-# TEMPORARY el7 CARVE-OUT - the Patch0-Patch6 series above targets 6.1.8 and does not
+# TEMPORARY el7 CARVE-OUT - the series above targets the ea-passenger-src tree and does not
 # apply to 6.0.27. These are the era-matched equivalents, applied only on el7.
 # Remove along with the version conditional when el7 support is dropped.
 Patch10:        el7-0001-Patch-build-files-to-use-SCL-libuv-paths.patch
@@ -222,7 +221,15 @@ Requires: %{?scl:%scl_prefix}ruby
 Phusion Passenger application server for %{scl_prefix}.
 
 %prep
+%if 0%{?rhel} == 7
 %setup -q %{?scl:-n %{gem_name}-release-%{version}}
+%else
+%setup -q -T -c %{?scl:-n %{gem_name}-release-%{version}}
+cp -a /opt/cpanel/ea-passenger-src/passenger-release-%{version}/. .
+# That tree went through brp-mangle-shebangs, pinning scripts to the system ruby and node.
+# Restore the upstream env lookup so they run under the SCL ruby as before.
+grep -rlZ -e '^#!/usr/bin/ruby$' -e '^#!/usr/bin/node$' . | xargs -0 -r sed -i -e '1s|^#!/usr/bin/ruby$|#!/usr/bin/env ruby|' -e '1s|^#!/usr/bin/node$|#!/usr/bin/env node|'
+%endif
 
 %if 0%{?rhel} == 7
 # TEMPORARY el7 CARVE-OUT - era-matched series for Passenger 6.0.27. No -b suffixes:
@@ -241,17 +248,22 @@ Phusion Passenger application server for %{scl_prefix}.
 %patch7 -p1
 %else
 %patch0 -p1 -b .libuv
-%patch1 -p1 -b .tmpdir
 %patch2 -p1 -b .nativelibdir
-%patch3 -p1 -b .emptymsglog
 %patch4 -p1 -b .instanceregpath
 # Patch5 (ea-libcurl) was guarded by "rhel < 8", i.e. el7 only. el7 now takes the
 # el7 branch above, so it would be dead here.
-%patch6 -p1 -b .disablehtaccess
+# ea-passenger-src points the default TMPDIR at its shared runtime dir; this package
+# creates and owns its own. Fail if the source no longer matches what we rewrite.
+for f in src/cxx_supportlib/Utils.cpp src/ruby_supportlib/phusion_passenger/admin_tools.rb; do
+    grep -q '/var/run/ea-passenger-runtime' $f || { echo "TMPDIR default not found in $f" >&2; exit 1; }
+    sed -i 's|/var/run/ea-passenger-runtime|/var/run/ea-ruby27-passenger|g' $f
+done
 %endif
 cp %{SOURCE15} .
 
+%if 0%{?rhel} == 7
 tar -xf %{SOURCE3}
+%endif
 
 # Don't use bundled libuv
 rm -rf src/cxx_supportlib/vendor-modified/libuv
@@ -269,6 +281,9 @@ done
 export LD_LIBRARY_PATH=%{_libdir}:$LD_LIBRARY_PATH
 export USE_VENDORED_LIBEV=true
 export USE_VENDORED_LIBUV=false
+%if 0%{?rhel} >= 10
+export LIBEV_CONFIGURE_HOST=x86_64-redhat-linux-gnu
+%endif
 export GEM_PATH=%{gem_dir}:${GEM_PATH:+${GEM_PATH}}${GEM_PATH:-`scl enable ea-ruby27 -- ruby -e "print Gem.path.join(':')"`}
 CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
 CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
@@ -289,6 +304,15 @@ export EXTRA_CXXFLAGS="-I/opt/cpanel/ea-ruby27/root/usr/include -I/usr/include"
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
+
+%if 0%{?rhel} != 7
+# ea-passenger-src does not keep patch-time mtimes, so rake cannot tell the Apache config
+# code is older than its patched config_options.rb. Regenerate it explicitly.
+for gen in ConfigGeneral/AutoGeneratedDefinitions.cpp ConfigGeneral/AutoGeneratedSetterFuncs.cpp ServerConfig/AutoGeneratedStruct.h DirConfig/AutoGeneratedStruct.h; do
+    rm -f src/apache2_module/$gen
+    rake src/apache2_module/$gen
+done
+%endif
 
 rake fakeroot \
     NATIVE_PACKAGING_METHOD=rpm \
@@ -313,8 +337,12 @@ find . -name "*.rb" -print | xargs sed -i '1s:^#!.*ruby.*$:#!/opt/cpanel/ea-ruby
 %install
 
 mkdir -p %{buildroot}/opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
+%if 0%{?rhel} == 7
 tar xzf %{SOURCE0} -C %{buildroot}/opt/cpanel/ea-ruby27/src/
 tar xzf %{SOURCE3} -C %{buildroot}/opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
+%else
+cp -a /opt/cpanel/ea-passenger-src/passenger-release-%{version}/. %{buildroot}/opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
+%endif
 
 # Remove test directories that contain Python 3 syntax incompatible with Python 2 byte-compilation
 rm -rf %{buildroot}/opt/cpanel/ea-ruby27/src/passenger-release-%{version}/test/
@@ -541,6 +569,12 @@ fi
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Tue Oct 20 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.2.1-1
+- EA-13602: ea-passenger-src was updated from v6.2.0 to v6.2.1
+
+* Thu Oct 15 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.2.0-2
+- EA-13596: Build from ea-passenger-src instead of a separate Passenger source tarball
+
 * Thu Oct 01 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.2.0-1
 - EA-13534: Update ea-ruby27-passenger from v6.1.8 to v6.2.0
 
