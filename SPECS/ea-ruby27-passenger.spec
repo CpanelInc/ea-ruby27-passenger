@@ -40,7 +40,7 @@
 # pinned at 6.0.27 on purpose - it cannot compile anything newer. The non-el7 define
 # must come first: et reads and rewrites the first passenger_version it finds.
 %if 0%{?rhel} != 7
-%define passenger_version 6.2.1
+%define passenger_version 6.2.2
 %else
 %define passenger_version 6.0.27
 %global release_prefix 2
@@ -569,6 +569,9 @@ fi
 /opt/cpanel/ea-ruby27/src/passenger-release-%{version}/
 
 %changelog
+* Tue Nov 17 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.2.2-1
+- EA-13655: ea-passenger-src was updated from v6.2.1 to v6.2.2
+
 * Tue Oct 20 2026 Cory McIntire <cory.mcintire@webpros.com> - 6.2.1-1
 - EA-13602: ea-passenger-src was updated from v6.2.0 to v6.2.1
 
